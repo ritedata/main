@@ -58,18 +58,37 @@ body.edit #editbar{display:flex}
 #cropbar label{display:flex;align-items:center;gap:6px;min-width:0}
 #cropbar input{flex:1;min-width:0;accent-color:var(--accent)}
 #cropbar output{min-width:34px;text-align:right;color:var(--muted)}
-#bar{display:grid;grid-template-columns:1fr auto auto auto 1fr;align-items:center;gap:6px;padding:5px 10px;border-top:1px solid var(--line);background:var(--surface)}
+#bar{display:flex;align-items:center;gap:6px;padding:5px 10px;border-top:1px solid var(--line);background:var(--surface)}
+#bar>*{flex:none}
+#bar #prev,#bar #next{flex:1 1 0;min-width:0}
+.bfirst,.fob{display:none}
+body.pg2 .bfirst{display:inline-flex}
+body.focus .fob{display:inline-flex}
+body.focus.notempo .tpb{display:none}
+#bar #bFirst{min-width:40px}
+#bar #bMic{min-width:84px}
+#bMic.on{background:#2e7d32;border-color:#2e7d32;color:#fff;font-weight:600}
+#bMic.alert{background:#ff0000!important;border-color:#ff0000!important;color:#fff!important}
+#cropbar .seg{grid-column:1/-1;display:flex;gap:6px}
+#cropbar .seg button{grid-column:auto;flex:1;padding:6px 10px}
+#cropbar .seg button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+#cropbar .full{grid-column:1/-1}
 #bar button{padding:7px 8px;font-size:.9rem;border-radius:8px;min-height:38px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;justify-content:center}
 #ind{min-width:56px;text-align:center;color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 body.focus #libBtn,body.focus #fit{display:none}
 body.focus #bar{grid-template-columns:1fr auto auto auto auto auto 1fr}
-@media (max-width:340px){body.focus #ind{display:none}body.focus #bar{grid-template-columns:1fr auto auto auto auto 1fr}}
+@media (max-width:520px){body.focus #ind{display:none}}
+@media (max-width:560px){body.pg2 #prev .lbl,body.pg2 #next .lbl{display:none}}
+@media (max-width:380px){body.focus #ind{display:none}#bar{gap:4px;padding:5px 6px}#bar #bFirst,#bar #libBtn,#bar #fit,#bar #exitFit,#bar #bPlay,#bar #bReset,#bar #bTmp,#bar #bMic{min-width:34px!important;padding-left:4px;padding-right:4px}}
+@media (max-width:340px){#bar #bFirst,#bar #libBtn,#bar #fit,#bar #exitFit,#bar #bPlay,#bar #bReset,#bar #bTmp,#bar #bMic{min-width:32px!important}}
 #bar #bTmp{min-width:112px}
 .tpb.off{opacity:.6;border-style:dashed}
 body.tvhide.focus #tv .tbx,body.tvhide.focus .tcb{display:none}
 #cropBtn.act,#lightBtn.act,#tempoBtn.act,#editBtn.act{background:#ffd700;border-color:#ffd700;color:#1d1b18;font-weight:700}
 #lightBtn.adj::after{content:'\25cf';color:var(--accent);font-size:.6em;margin-left:5px}
 #mic.alert{background:#ff0000!important;border-color:#ff0000!important;color:#fff!important}
+#mic.reconn,#bMic.reconn{background:#ffb300;border-color:#ffb300;color:#1d1b18;font-weight:700}
+body:not(.lib) #mic.reconn{display:inline-flex}
 body:not(.lib) #mic.alert{display:inline-flex}
 #micBanner{display:block;flex:none;width:100%;background:#ff0000;color:#fff;border:0;border-bottom:2px solid #fff;border-radius:0;padding:9px 12px;font-weight:700;font-size:.9rem;text-align:center;cursor:pointer;white-space:normal;line-height:1.25}
 #micBanner[hidden]{display:none}
@@ -84,11 +103,11 @@ body.focus .tpb{display:inline-flex}
 #bar #bPlay{min-width:88px}
 #bar #bReset{min-width:40px}
 #bPlay.playing{background:#2e7d32;border-color:#2e7d32;color:#fff;font-weight:600}
-@media (max-width:640px){body.focus #bar #exitFit .lbl,.tpb .lbl{display:none}#bar #bPlay,#bar #bTmp{min-width:40px}}
-@media (max-width:700px){body.focus #prev .lbl,body.focus #next .lbl{display:none}}
+@media (max-width:640px){body.focus #bar #exitFit .lbl,body.focus #bFirst .lbl,.tpb .lbl,.fob .lbl{display:none}#bar #bPlay,#bar #bTmp,#bar #bMic{min-width:40px}}
+@media (max-width:900px){body.focus #prev .lbl,body.focus #next .lbl{display:none}}
 @media (max-width:420px){#bar{gap:5px;padding:5px 8px}#bar button{font-size:.82rem;padding:7px 5px}#ind{min-width:48px;font-size:.82rem}}
 #bar #libBtn,#bar #fit,#bar #exitFit{min-width:40px}
-@media (max-width:400px){#prev .lbl,#next .lbl{display:none}}
+@media (max-width:400px){#prev .lbl,#next .lbl,#bFirst .lbl{display:none}}
 @media (max-width:350px){#bar .lbl{display:none}}
 body.focus header,body.focus #cropbar{display:none}
 .pn{display:none;position:fixed;z-index:6;pointer-events:none;font-weight:800;font-size:clamp(2rem,9vw,3.4rem);line-height:1;padding:4px 14px;border-radius:12px;background:rgba(0,0,0,.6);color:#fff;font-variant-numeric:tabular-nums}
@@ -222,6 +241,7 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
 <div id="editbar">
   <button data-tool="circle" class="primary">⭕ Circle</button>
   <button data-tool="rect">▭ Rectangle</button>
+  <button data-tool="line" title="Drag to draw a straight line (hold Shift to snap to 15° steps)">╱ Line</button>
   <button data-tool="erase">🧽 Eraser</button>
   <button data-tool="region" title="Select a region of the sheet, then copy it and paste it as a movable picture">⬚ Region</button>
   <button data-tool="pan" title="Drag to move around when zoomed in (also: hold Space and drag, or use two fingers)">✋ Pan</button>
@@ -243,6 +263,8 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <span id="sdGrp"><button id="saveFlat" title="Save: permanently flatten all edits, erasures, pasted snippets and your crop into the PDF. Tempo settings are kept.">💾 Save</button><button id="eDone" class="primary">Done</button></span>
 </div>
 <div id="cropbar">
+  <div class="seg" role="group" aria-label="Crop scope"><button id="csAll" class="on" aria-pressed="true" title="Apply the margins to every page">All pages</button><button id="csPage" aria-pressed="false" title="Apply the margins to the page you are viewing only">This page only</button></div>
+  <div id="csHint" class="hint full"></div>
   <label>Left <input id="cl" type="range" min="0" max="45" step="0.5" value="0"><output id="clv">0%</output></label>
   <label>Right <input id="cr" type="range" min="0" max="45" step="0.5" value="0"><output id="crv">0%</output></label>
   <label>Top <input id="ct" type="range" min="0" max="45" step="0.5" value="0"><output id="ctv">0%</output></label>
@@ -250,6 +272,7 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <button id="cReset">Reset (saved for this PDF)</button>
 </div>
 <div id="bar">
+  <button id="bFirst" class="bfirst" aria-label="Back to page 1" title="Jump straight back to page 1"><span class="ic">⇤</span><span class="lbl"> Page 1</span></button>
   <button id="prev" class="nav" disabled aria-label="Previous page">◀<span class="lbl"> Previous</span></button>
   <button id="libBtn" title="Back to library" aria-label="Library">📚<span class="lbl"> Library</span></button>
   <button id="exitFit" title="Back to main screen" aria-label="Menu">☰<span class="lbl"> Menu</span></button>
@@ -258,6 +281,7 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <button id="bTmp" class="tpb" aria-label="Hide tempo boxes" aria-pressed="false" title="Show / hide the tempo boxes on the sheet"><span class="ic">◉</span><span class="lbl"> Hide tempos</span></button>
   <span id="ind">–</span>
   <button id="fit" title="Hide all controls except Previous / Next (Esc or double-tap to restore)" aria-label="Fit">⤢<span class="lbl"> Fit</span></button>
+  <button id="bMic" class="fob" aria-label="Voice commands off. Tap to turn on" aria-pressed="false" title="Microphone: voice commands on / off"><span class="ic">🎤</span><span class="lbl"> Off</span></button>
   <button id="next" class="nav primary" disabled aria-label="Next page"><span class="lbl">Next </span>▶</button>
 </div>
 
@@ -453,7 +477,7 @@ async function openDoc(m){
   current=m;pages=[];cur=0;beepReady=false;tempoHalt();
   document.body.classList.remove('lib','edit','calib');hist=[];sel=null;
   $('title').textContent=m.title+(m.author?' — '+m.author:'');
-  const c=m.crop||{};cropL=c.l||0;cropR=c.r||0;cropT=c.t||0;cropB=c.b||0;syncCrop(false);
+  const c=m.crop||{};cropScope='all';cropL=c.l||0;cropR=c.r||0;cropT=c.t||0;cropB=c.b||0;syncCrop(false);
   const msg=document.createElement('p');msg.className='note';msg.textContent='Loading…';view.replaceChildren(msg);updateNav();
   try{
     if(!window.pdfjsLib)throw new Error('PDF reader not loaded');
@@ -504,6 +528,7 @@ $('libBtn').onclick=showLibrary;
 /* ---------- viewer ---------- */
 const fitWidth=false;
 let cropL=0,cropR=0,cropT=0,cropB=0;
+let cropScope='all';
 function layout(){
   const w=$('crop'),el=$('page');if(!w||!el)return;
   const nw=el.width,nh=el.height;if(!nw||!nh)return;
@@ -515,17 +540,50 @@ function layout(){
   for(const id of ['ov','tv']){const o=$(id);if(o){o.style.width=(nw*s)+'px';o.style.height=(nh*s)+'px';o.style.marginLeft=(-l*nw*s)+'px';o.style.marginTop=(-t*nh*s)+'px'}}
   viewS=s;buildTempo();renderMarks();
 }
+/* crop: one document-wide crop (crop) plus optional per-page crops (pageCrops[pageIndex]) that win on their page */
+function cropOf(m,p){return(m&&m.pageCrops&&m.pageCrops[p])||(m&&m.crop)||{l:0,r:0,t:0,b:0}}
+function cleanPageCrops(src,n){
+  const out={};if(!src||typeof src!=='object')return out;
+  for(const k of Object.keys(src)){
+    if(!/^\d{1,5}$/.test(k)||(n>0&&+k>=n))continue;
+    const c=src[k]||{};out[k]={l:num(c.l,0,45),r:num(c.r,0,45),t:num(c.t,0,45),b:num(c.b,0,45)};
+  }
+  return out;
+}
+function loadCropVars(){const c=cropOf(current,cur);cropL=c.l||0;cropR=c.r||0;cropT=c.t||0;cropB=c.b||0;cropUI()}
+function cropUI(){
+  $('cl').value=cropL;$('cr').value=cropR;$('ct').value=cropT;$('cb').value=cropB;
+  $('clv').textContent=cropL+'%';$('crv').textContent=cropR+'%';$('ctv').textContent=cropT+'%';$('cbv').textContent=cropB+'%';
+  const pcs=current&&current.pageCrops?Object.keys(current.pageCrops).length:0,own=!!(current&&current.pageCrops&&current.pageCrops[cur]),a=cropScope==='all';
+  $('csAll').classList.toggle('on',a);$('csAll').setAttribute('aria-pressed',a?'true':'false');
+  $('csPage').classList.toggle('on',!a);$('csPage').setAttribute('aria-pressed',a?'false':'true');
+  $('cReset').textContent=a?'Reset the crop on all pages':'Use the document crop on this page';
+  $('csHint').textContent=a?('Applies to every page'+(pcs?' \u00b7 '+pcs+' page'+(pcs===1?' has':'s have')+' their own crop (replaced if you move a slider)':'')):('Applies to page '+(cur+1)+' only \u00b7 '+(own?'this page has its own crop':'currently using the document crop'));
+}
 function syncCrop(save=true){
   $('cl').value=cropL;$('cr').value=cropR;$('ct').value=cropT;$('cb').value=cropB;
   $('clv').textContent=cropL+'%';$('crv').textContent=cropR+'%';$('ctv').textContent=cropT+'%';$('cbv').textContent=cropB+'%';
   layout();
-  if(save&&current){current.crop={l:cropL,r:cropR,t:cropT,b:cropB};saveMeta()}
+  if(save&&current){
+    const c={l:cropL,r:cropR,t:cropT,b:cropB};
+    if(cropScope==='page'){current.pageCrops=current.pageCrops||{};current.pageCrops[cur]=c}
+    else{current.crop=c;if(current.pageCrops&&Object.keys(current.pageCrops).length){current.pageCrops={};toast('Applied to all pages: custom page crops cleared')}}
+    saveMeta();
+  }
+  cropUI();
 }
 $('cl').oninput=e=>{cropL=+e.target.value;syncCrop()};
 $('cr').oninput=e=>{cropR=+e.target.value;syncCrop()};
 $('ct').oninput=e=>{cropT=+e.target.value;syncCrop()};
 $('cb').oninput=e=>{cropB=+e.target.value;syncCrop()};
-$('cReset').onclick=()=>{cropL=cropR=cropT=cropB=0;syncCrop()};
+$('cReset').onclick=()=>{
+  if(cropScope==='page'){
+    if(current&&current.pageCrops&&current.pageCrops[cur]){delete current.pageCrops[cur];if(!Object.keys(current.pageCrops).length)delete current.pageCrops;saveMeta()}
+    loadCropVars();layout();toast('This page now uses the document crop');
+  }else{cropL=cropR=cropT=cropB=0;syncCrop()}
+};
+$('csAll').onclick=()=>{cropScope='all';cropUI()};
+$('csPage').onclick=()=>{cropScope='page';cropUI()};
 $('cropBtn').onclick=()=>{$('cropbar').classList.toggle('open');layout()};
 addEventListener('resize',()=>{layout();setBarH()});
 
@@ -534,6 +592,7 @@ function updateNav(){
   $('ind').textContent=(wantOn?'🎤 ':'')+(pages.length?(cur+1)+' / '+n:'–');
   for(const el of document.querySelectorAll('.pn'))el.textContent=pages.length?String(cur+1):'';
   setBarH();
+  document.body.classList.toggle('pg2',pages.length>0&&cur>0);
   $('prev').disabled=!pages.length||cur===0;
   $('next').disabled=!pages.length||cur>=pages.length-1;
 }
@@ -560,7 +619,7 @@ function show(i,silent){
     try{view.replaceChildren(...before)}catch(e){}
     return false;
   }
-  for(const step of [renderMarks,layout,()=>{view.scrollTop=0},updateNav,()=>tempoOnShow(was)]){try{step()}catch(e){console.error(e)}}
+  for(const step of [loadCropVars,renderMarks,layout,()=>{view.scrollTop=0},updateNav,()=>tempoOnShow(was)]){try{step()}catch(e){console.error(e)}}
   if(current&&current.page!==cur){current.page=cur;try{saveMeta()}catch(e){}}
   if(beepReady&&!silent&&cur!==was){try{beep()}catch(e){}}
   beepReady=true;
@@ -581,7 +640,7 @@ function turn(i){
   return ok;
 }
 const next=()=>turn(cur+1),prev=()=>turn(cur-1);
-$('next').onclick=next;$('prev').onclick=prev;
+$('next').onclick=next;$('prev').onclick=prev;$('bFirst').onclick=()=>turn(0);
 
 function setBarH(){const r=document.documentElement.style;r.setProperty('--barh',$('bar').offsetHeight+'px');r.setProperty('--below',Math.max(0,Math.round(innerHeight-view.getBoundingClientRect().bottom))+'px')}
 function setFocus(on){document.body.classList.toggle('focus',on);setBarH();layout();setTimeout(()=>{setBarH();layout()},50)}
@@ -632,7 +691,7 @@ view.addEventListener('touchend',e=>{
 
 /* ---------- marks: circles & text (saved per PDF) ---------- */
 const NS='http://www.w3.org/2000/svg';
-const COLORS=['#e53935','#ffd600','#1e66f5','#2e9e4f','#111111'],SW=[.0035,.007,.012],FS=[.022,.032,.048];
+const COLORS=['#e53935','#ffd600','#1e66f5','#2e9e4f','#111111'],SW=[.0035,.007,.012,.02],FS=[.022,.032,.048,.07];
 let tool='circle',color=COLORS[0],size=1,fill=false,sel=null,drag=null,hist=[];
 let eraseShape='rect',eraseSize=+lsGet('esz',4);
 const snipSrc=new Map();let regionSel=null,regionDrag=null,clip=null;
@@ -644,7 +703,7 @@ function pageMarks(create){
   return(current.marks&&current.marks[cur])||[];
 }
 const selMark=()=>pageMarks().find(m=>m.id===sel);
-const validMark=m=>!!m&&typeof m==='object'&&(m.t==='snip'?(typeof m.src==='string'&&isFinite(m.x)&&isFinite(m.y)&&isFinite(m.w)&&isFinite(m.h)):m.t==='circle'?isFinite(m.cx)&&isFinite(m.cy)&&isFinite(m.r):m.t==='rect'?isFinite(m.x)&&isFinite(m.y)&&isFinite(m.rw)&&isFinite(m.rh):m.t==='text'?typeof m.text==='string'&&isFinite(m.x)&&isFinite(m.y):m.t==='erase'?(m.k==='brush'?Array.isArray(m.pts)&&m.pts.length>0:m.k==='rect'&&isFinite(m.x)&&isFinite(m.y)&&isFinite(m.rw)&&isFinite(m.rh)):false);
+const validMark=m=>!!m&&typeof m==='object'&&(m.t==='line'?(isFinite(m.x1)&&isFinite(m.y1)&&isFinite(m.x2)&&isFinite(m.y2)):m.t==='snip'?(typeof m.src==='string'&&isFinite(m.x)&&isFinite(m.y)&&isFinite(m.w)&&isFinite(m.h)):m.t==='circle'?isFinite(m.cx)&&isFinite(m.cy)&&isFinite(m.r):m.t==='rect'?isFinite(m.x)&&isFinite(m.y)&&isFinite(m.rw)&&isFinite(m.rh):m.t==='text'?typeof m.text==='string'&&isFinite(m.x)&&isFinite(m.y):m.t==='erase'?(m.k==='brush'?Array.isArray(m.pts)&&m.pts.length>0:m.k==='rect'&&isFinite(m.x)&&isFinite(m.y)&&isFinite(m.rw)&&isFinite(m.rh)):false);
 const orderMarks=l=>{const v=l.filter(validMark);return[...v.filter(x=>x.t==='erase'),...v.filter(x=>x.t==='snip'),...v.filter(x=>x.t!=='erase'&&x.t!=='snip')]};
 function snap(){const l=pageMarks();for(const m of l)if(m.t==='snip')snipSrc.set(m.id,m.src);hist.push([cur,JSON.stringify(l,(k,v)=>k==='src'?undefined:v)]);if(hist.length>50)hist.shift()}
 function renderMarks(){
@@ -663,6 +722,11 @@ function renderMarks(){
       g.append(svgEl('rect',{x,y,width:w,height:h,fill:m.f?m.c:'none','fill-opacity':.3,stroke:m.c,'stroke-width':sw,'stroke-linejoin':'round'}),
         svgEl('rect',{x,y,width:w,height:h,fill:m.f?'transparent':'none',stroke:'transparent','stroke-width':Math.max(sw*3,.035*nw)}));
       if(sel===m.id){const pd=sw+nw*.006;sb=svgEl('rect',{class:'sb',x:x-pd,y:y-pd,width:w+pd*2,height:h+pd*2,fill:'none',stroke:'#888','stroke-width':nw*.0025,'stroke-dasharray':(nw*.01)+' '+(nw*.01)})}
+    }else if(m.t==='line'){
+      const x1=m.x1*nw,y1=m.y1*nh,x2=m.x2*nw,y2=m.y2*nh,sw=m.w*nw;
+      g.append(svgEl('line',{x1,y1,x2,y2,stroke:m.c,'stroke-width':sw,'stroke-linecap':'round'}),
+        svgEl('line',{x1,y1,x2,y2,stroke:'transparent','stroke-width':Math.max(sw*3,.035*nw),'stroke-linecap':'round'}));
+      if(sel===m.id)sb=svgEl('line',{class:'sb',x1,y1,x2,y2,stroke:'#888','stroke-width':sw+4/(viewS||1),'stroke-dasharray':(6/(viewS||1))+' '+(4/(viewS||1)),'stroke-linecap':'round','stroke-opacity':.7});
     }else if(m.t==='snip'){
       const x=m.x*nw,y=m.y*nh,w=m.w*nw,h=m.h*nh;
       const im=svgEl('image',{x,y,width:w,height:h,preserveAspectRatio:'none'});
@@ -688,7 +752,7 @@ function renderMarks(){
     g.onpointerdown=e=>{
       e.stopPropagation();
       const p=ptr(e);
-      drag={k:'move',m,ox:m.t==='circle'?m.cx:m.x,oy:m.t==='circle'?m.cy:m.y,sx:p.x,sy:p.y,moved:false,was:sel===m.id};
+      drag={k:'move',m,ox:m.t==='circle'?m.cx:m.x,oy:m.t==='circle'?m.cy:m.y,l0:m.t==='line'?{x1:m.x1,y1:m.y1,x2:m.x2,y2:m.y2}:null,sx:p.x,sy:p.y,moved:false,was:sel===m.id};
       sel=m.id;ov.setPointerCapture(e.pointerId);renderMarks();
     };
     ov.appendChild(g);
@@ -697,6 +761,7 @@ function renderMarks(){
     }
     if(sb)ov.appendChild(sb);
     if(m.t==='snip'&&sel===m.id)addHandles(ov,m,nw,nh);
+    if(m.t==='line'&&sel===m.id)addLineHandles(ov,m,nw,nh);
   }
   drawRegion(ov,nw,nh);
   drawTempoHandles(ov,nw,nh);
@@ -780,6 +845,16 @@ function drawRegion(ov,nw,nh){
   const r=regionDrag?{x:Math.min(regionDrag.x0,regionDrag.x1),y:Math.min(regionDrag.y0,regionDrag.y1),w:Math.abs(regionDrag.x1-regionDrag.x0),h:Math.abs(regionDrag.y1-regionDrag.y0)}:regionSel;
   if(!r||tool!=='region'||!document.body.classList.contains('edit'))return;
   ov.appendChild(svgEl('rect',{class:'rg',x:r.x*nw,y:r.y*nh,width:r.w*nw,height:r.h*nh,fill:'#29b6f6','fill-opacity':.14,stroke:'#0288d1','stroke-width':2/(viewS||1),'stroke-dasharray':(7/(viewS||1))+' '+(5/(viewS||1))}));
+}
+function addLineHandles(ov,m,nw,nh){
+  const hs=(matchMedia('(pointer:coarse)').matches?30:20)/(viewS||1);
+  for(const end of [1,2]){
+    const cx=(end===1?m.x1:m.x2)*nw,cy=(end===1?m.y1:m.y2)*nh;
+    const h=svgEl('rect',{class:'snh',x:cx-hs/2,y:cy-hs/2,width:hs,height:hs,rx:hs*.5,fill:'#fff',stroke:'#e8794a','stroke-width':hs*.15});
+    h.style.cursor='crosshair';
+    h.onpointerdown=e=>{e.stopPropagation();e.preventDefault();snap();drag={k:'lend',m,end,moved:false};ov.setPointerCapture(e.pointerId)};
+    ov.appendChild(h);
+  }
 }
 function addHandles(ov,m,nw,nh){
   const hs=(matchMedia('(pointer:coarse)').matches?30:20)/(viewS||1),pts={nw:[m.x,m.y],ne:[m.x+m.w,m.y],sw:[m.x,m.y+m.h],se:[m.x+m.w,m.y+m.h]};
@@ -925,7 +1000,10 @@ function bindOverlay(ov){
   ov.onpointerdown=e=>{
     if(!document.body.classList.contains('edit'))return;
     const p=ptr(e),r=ov.getBoundingClientRect();
-    if(tool==='circle'||tool==='rect'){
+    if(tool==='line'){
+      snap();const m={id:uid(),t:'line',x1:p.x,y1:p.y,x2:p.x,y2:p.y,c:color,w:SW[size]};
+      pageMarks(true).push(m);sel=null;drag={k:'new',m,rw:r.width,rh:r.height,x0:p.x,y0:p.y};ov.setPointerCapture(e.pointerId);
+    }else if(tool==='circle'||tool==='rect'){
       snap();const m=tool==='circle'?{id:uid(),t:'circle',cx:p.x,cy:p.y,r:0,c:color,w:SW[size],f:fill}:{id:uid(),t:'rect',x:p.x,y:p.y,rw:0,rh:0,c:color,w:SW[size],f:fill};
       pageMarks(true).push(m);sel=null;drag={k:'new',m,rw:r.width,rh:r.height,x0:p.x,y0:p.y};ov.setPointerCapture(e.pointerId);
     }else if(tool==='erase'){
@@ -939,9 +1017,19 @@ function bindOverlay(ov){
   ov.onpointermove=e=>{
     if(!drag)return;const p=ptr(e);
     if(drag.k==='new'){
-      const m=drag.m;if(m.t==='rect'||m.k==='rect'){const px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));m.x=Math.min(drag.x0,px);m.y=Math.min(drag.y0,py);m.rw=Math.abs(px-drag.x0);m.rh=Math.abs(py-drag.y0)}else if(m.k==='brush'){const l=m.pts[m.pts.length-1],px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));if(m.pts.length<3000&&Math.hypot((px-l[0])*drag.rw,(py-l[1])*drag.rh)>=2)m.pts.push([+px.toFixed(4),+py.toFixed(4)])}else m.r=Math.hypot((p.x-m.cx)*drag.rw,(p.y-m.cy)*drag.rh)/drag.rw;renderMarks();
+      const m=drag.m;if(m.t==='line'){
+        let px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));
+        if(e.shiftKey){const dx=(px-m.x1)*drag.rw,dy=(py-m.y1)*drag.rh,len=Math.hypot(dx,dy),st=Math.PI/12,ang=Math.round(Math.atan2(dy,dx)/st)*st;px=Math.max(0,Math.min(1,m.x1+Math.cos(ang)*len/drag.rw));py=Math.max(0,Math.min(1,m.y1+Math.sin(ang)*len/drag.rh))}
+        m.x2=px;m.y2=py;renderMarks();return}
+      if(m.t==='rect'||m.k==='rect'){const px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));m.x=Math.min(drag.x0,px);m.y=Math.min(drag.y0,py);m.rw=Math.abs(px-drag.x0);m.rh=Math.abs(py-drag.y0)}else if(m.k==='brush'){const l=m.pts[m.pts.length-1],px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));if(m.pts.length<3000&&Math.hypot((px-l[0])*drag.rw,(py-l[1])*drag.rh)>=2)m.pts.push([+px.toFixed(4),+py.toFixed(4)])}else m.r=Math.hypot((p.x-m.cx)*drag.rw,(p.y-m.cy)*drag.rh)/drag.rw;renderMarks();
     }else if(drag.k==='tap'){
       if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>8)drag.k='none';
+    }else if(drag.k==='lend'){
+      const m=drag.m;drag.moved=true;
+      let px=Math.max(0,Math.min(1,p.x)),py=Math.max(0,Math.min(1,p.y));
+      if(e.shiftKey){const ox=drag.end===1?m.x2:m.x1,oy=drag.end===1?m.y2:m.y1,r=$('ov').getBoundingClientRect(),dx=(px-ox)*r.width,dy=(py-oy)*r.height,len=Math.hypot(dx,dy),st=Math.PI/12,ang=Math.round(Math.atan2(dy,dx)/st)*st;px=Math.max(0,Math.min(1,ox+Math.cos(ang)*len/r.width));py=Math.max(0,Math.min(1,oy+Math.sin(ang)*len/r.height))}
+      if(drag.end===1){m.x1=px;m.y1=py}else{m.x2=px;m.y2=py}
+      renderMarks();
     }else if(drag.k==='resize'){
       const m=drag.m;drag.moved=true;
       const w=Math.max(.04,Math.abs(p.x-drag.fx)),h=w*drag.ratio;
@@ -953,19 +1041,21 @@ function bindOverlay(ov){
       const dx=p.x-drag.sx,dy=p.y-drag.sy;
       if(!drag.moved){if(Math.abs(dx)+Math.abs(dy)<.004)return;snap();drag.moved=true}
       const m=drag.m,mw=m.rw||(m.t==='snip'?m.w:0),mh=m.rh||(m.t==='snip'?m.h:0),nx=Math.max(0,Math.min(1-mw,drag.ox+dx)),ny=Math.max(0,Math.min(1-mh,drag.oy+dy));
-      if(m.t==='circle'){m.cx=nx;m.cy=ny}else{m.x=nx;m.y=ny}
+      if(m.t==='line'){const l=drag.l0,mnx=Math.min(l.x1,l.x2),mxx=Math.max(l.x1,l.x2),mny=Math.min(l.y1,l.y2),mxy=Math.max(l.y1,l.y2),ddx=Math.max(-mnx,Math.min(1-mxx,dx)),ddy=Math.max(-mny,Math.min(1-mxy,dy));m.x1=l.x1+ddx;m.x2=l.x2+ddx;m.y1=l.y1+ddy;m.y2=l.y2+ddy}else if(m.t==='circle'){m.cx=nx;m.cy=ny}else{m.x=nx;m.y=ny}
       renderMarks();
     }
   };
   ov.onpointerup=ov.onpointercancel=async e=>{
     const d=drag;drag=null;if(!d)return;
     if(d.k==='new'){
-      const tiny=(d.m.t==='rect'||d.m.k==='rect')?(d.m.rw<.006||d.m.rh<.006):(d.m.k==='brush'?false:d.m.r<.006);
+      const tiny=d.m.t==='line'?Math.hypot((d.m.x2-d.m.x1)*d.rw,(d.m.y2-d.m.y1)*d.rh)<6:(d.m.t==='rect'||d.m.k==='rect')?(d.m.rw<.006||d.m.rh<.006):(d.m.k==='brush'?false:d.m.r<.006);
       if(tiny){pageMarks().pop();hist.pop()}
       renderMarks();saveMeta();
     }else if(d.k==='tap'){
       const t=await askText('');
       if(t){snap();pageMarks(true).push({id:uid(),t:'text',x:d.x,y:d.y,text:t,c:color,s:FS[size]});renderMarks();saveMeta()}
+    }else if(d.k==='lend'){
+      if(d.moved)saveMeta();
     }else if(d.k==='resize'){
       if(d.moved)saveMeta();
     }else if(d.k==='move'){
@@ -980,7 +1070,7 @@ function bindOverlay(ov){
 function toolsUI(){
   for(const b of document.querySelectorAll('#editbar [data-tool]'))b.classList.toggle('primary',b.dataset.tool===tool);
   const ov=$('ov');if(ov)ov.dataset.tool=tool;
-  $('eSize').textContent='Size: '+['S','M','L'][size];
+  $('eSize').textContent='Size: '+['S','M','L','XL'][size];
   $('eFill').textContent='Fill: '+(fill?'on':'off');
   const eb=$('editbar');eb.dataset.tool=tool;eb.dataset.shape=eraseShape;
   $('eShape').textContent=eraseShape==='rect'?'▭ Box':'● Brush';$('eSz').value=eraseSize;$('eSzv').textContent=eraseSize;
@@ -993,7 +1083,7 @@ for(const c of COLORS){
   $('eColors').appendChild(b);
 }
 $('eSize').onclick=()=>{
-  size=(size+1)%3;const m=selMark();
+  size=(size+1)%4;const m=selMark();
   if(m&&m.t!=='erase'){snap();if(m.t==='text')m.s=FS[size];else m.w=SW[size];renderMarks();saveMeta()}
   toolsUI();
 };
@@ -1086,7 +1176,7 @@ function pruneOrphans(marks,tempo,n){
 function envStats(entries){
   const s={pdfs:entries.length,cropped:0,tempoGrids:0,systems:0,annotations:0,erasures:0,links:0,snippets:0};
   for(const e of entries){
-    const c=e.crop||{};if(c.l||c.r||c.t||c.b)s.cropped++;if(e.youtube)s.links++;
+    const c=e.crop||{};if(c.l||c.r||c.t||c.b||Object.values(e.pageCrops||{}).some(x=>x&&(x.l||x.r||x.t||x.b)))s.cropped++;if(e.youtube)s.links++;
     for(const k of Object.keys(e.marks||{}))for(const m of e.marks[k]){if(m.t==='erase')s.erasures++;else if(m.t==='snip'){s.snippets++;s.annotations++}else s.annotations++}
     if(e.tempo&&e.tempo.pages){let n=0;for(const k of Object.keys(e.tempo.pages))n+=e.tempo.pages[k].length;if(n){s.tempoGrids++;s.systems+=n}}
   }
@@ -1116,7 +1206,7 @@ async function exportLibrary(){
       const file='files/'+m.id+'.pdf';
       zip.file(file,await rec.blob.arrayBuffer());
       const pr=pruneOrphans(m.marks,m.tempo,m.numPages||0);
-      entries.push({id:m.id,title:m.title,author:m.author||'',pinned:!!m.pinned,added:m.added,updated:m.updated||m.added,numPages:m.numPages||0,page:m.page||0,crop:m.crop||{l:0,r:0,t:0,b:0},marks:pr.marks,tempo:pr.tempo||null,youtube:m.youtube||'',hash:m.hash||'',size:rec.blob.size,file});
+      entries.push({id:m.id,title:m.title,author:m.author||'',pinned:!!m.pinned,added:m.added,updated:m.updated||m.added,numPages:m.numPages||0,page:m.page||0,crop:m.crop||{l:0,r:0,t:0,b:0},pageCrops:Object.fromEntries(Object.entries(m.pageCrops||{}).filter(([k])=>!(m.numPages>0&&+k>=m.numPages))),marks:pr.marks,tempo:pr.tempo||null,youtube:m.youtube||'',hash:m.hash||'',size:rec.blob.size,file});
     }
     zip.file('library.json',JSON.stringify({format:'partitura-library',version:2,app:'Partitura',exportedAt:Date.now(),device:(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'',settings:readSettings(),summary:envStats(entries),entries},null,1));
     const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
@@ -1139,6 +1229,7 @@ function cleanMarks(src){
       const base={id:String(m.id||uid()).slice(0,40),c:colOK(m.c)?m.c:'#e53935'};
       if(m.t==='circle')list.push({...base,t:'circle',cx:num(m.cx,0,1),cy:num(m.cy,0,1),r:num(m.r,0,1),w:num(m.w,.001,.05,.007),f:!!m.f});
       else if(m.t==='rect')list.push({...base,t:'rect',x:num(m.x,0,1),y:num(m.y,0,1),rw:num(m.rw,0,1),rh:num(m.rh,0,1),w:num(m.w,.001,.05,.007),f:!!m.f});
+      else if(m.t==='line'&&[m.x1,m.y1,m.x2,m.y2].every(v=>typeof v==='number'&&isFinite(v)))list.push({...base,t:'line',x1:num(m.x1,0,1),y1:num(m.y1,0,1),x2:num(m.x2,0,1),y2:num(m.y2,0,1),w:num(m.w,.001,.05,.007)});
       else if(m.t==='erase'&&m.k==='rect')list.push({id:base.id,t:'erase',k:'rect',x:num(m.x,0,1),y:num(m.y,0,1),rw:num(m.rw,0,1),rh:num(m.rh,0,1)});
       else if(m.t==='erase'&&m.k==='brush'&&Array.isArray(m.pts)&&m.pts.length)list.push({id:base.id,t:'erase',k:'brush',w:num(m.w,.001,.1,.02),pts:m.pts.slice(0,3000).filter(q=>Array.isArray(q)).map(q=>[num(q[0],0,1),num(q[1],0,1)])});
       else if(m.t==='snip'&&typeof m.src==='string'&&/^data:image\/(png|jpeg);base64,[A-Za-z0-9+\/=]+$/.test(m.src)&&m.src.length<4e6)list.push({id:base.id,t:'snip',x:num(m.x,0,1),y:num(m.y,0,1),w:num(m.w,.02,1,.2),h:num(m.h,.01,1,.1),src:m.src});
@@ -1155,7 +1246,7 @@ function cleanEntry(e){
   const cr=e.crop||{};
   return{id:(typeof e.id==='string'&&/^[\w-]{4,64}$/.test(e.id))?e.id:uid(),title,author:typeof e.author==='string'?e.author.trim().slice(0,120):'',pinned:!!e.pinned,
     added:num(e.added,0,8.64e15,Date.now()),updated:num(e.updated,0,8.64e15,0),numPages:Math.round(num(e.numPages,0,100000,0)),page:Math.round(num(e.page,0,100000,0)),
-    crop:{l:num(cr.l,0,45),r:num(cr.r,0,45),t:num(cr.t,0,45),b:num(cr.b,0,45)},marks:cleanMarks(e.marks),tempo:cleanTempo(e.tempo),youtube:(ytParse(e.youtube).url||''),hash:typeof e.hash==='string'?e.hash.slice(0,80):'',size:num(e.size,0,4e9,0),file:e.file};
+    crop:{l:num(cr.l,0,45),r:num(cr.r,0,45),t:num(cr.t,0,45),b:num(cr.b,0,45)},marks:cleanMarks(e.marks),pageCrops:cleanPageCrops(e.pageCrops,Math.round(num(e.numPages,0,100000,0))),tempo:cleanTempo(e.tempo),youtube:(ytParse(e.youtube).url||''),hash:typeof e.hash==='string'?e.hash.slice(0,80):'',size:num(e.size,0,4e9,0),file:e.file};
 }
 function askImport(info,nLocal,nBackup){return new Promise(res=>{
   const d=$('iDlg'),ok=$('iOk'),radios=[...document.querySelectorAll('input[name=imode]')];
@@ -1214,7 +1305,7 @@ async function importLibrary(file){
             const nh=await sha256(nb);
             if(!weak(nh)&&nh!==e.hash)throw new Error('damaged file');
             if(e.size&&nb.byteLength!==e.size)throw new Error('size mismatch');
-            const nm={...idHit,title:e.title,author:e.author,pinned:e.pinned,crop:e.crop,marks:e.marks,tempo:e.tempo,youtube:e.youtube,page:e.page,numPages:e.numPages,updated:e.updated,hash:nh};
+            const nm={...idHit,title:e.title,author:e.author,pinned:e.pinned,crop:e.crop,pageCrops:e.pageCrops,marks:e.marks,tempo:e.tempo,youtube:e.youtube,page:e.page,numPages:e.numPages,updated:e.updated,hash:nh};
             await dbPut(nm,new Blob([nb],{type:'application/pdf'}));
             byId.set(nm.id,nm);if(idHit.hash)byHash.delete(idHit.hash);byHash.set(nh,nm);updated++;
           }else same++;
@@ -1225,7 +1316,7 @@ async function importLibrary(file){
         if(idHit&&!match)e.id=uid();
         if(match){
           if(e.updated>(match.updated||match.added||0)){
-            Object.assign(match,{title:e.title,author:e.author,pinned:e.pinned,crop:e.crop,marks:e.marks,tempo:e.tempo,youtube:e.youtube,page:e.page,updated:e.updated});
+            Object.assign(match,{title:e.title,author:e.author,pinned:e.pinned,crop:e.crop,pageCrops:e.pageCrops,marks:e.marks,tempo:e.tempo,youtube:e.youtube,page:e.page,updated:e.updated});
             await dbMeta({...match,crop:{...match.crop}});updated++;
           }else same++;
           continue;
@@ -1237,7 +1328,7 @@ async function importLibrary(file){
         const hash=await sha256(buf);
         if(!weak(e.hash)&&!weak(hash)&&e.hash!==hash)throw new Error('damaged file');
         if(!weak(hash)&&byHash.has(hash)){same++;continue}
-        const meta={id:e.id,title:e.title,author:e.author,pinned:e.pinned,added:e.added,updated:e.updated||e.added,numPages:e.numPages,page:e.page,crop:e.crop,marks:e.marks,tempo:e.tempo,youtube:e.youtube,hash};
+        const meta={id:e.id,title:e.title,author:e.author,pinned:e.pinned,added:e.added,updated:e.updated||e.added,numPages:e.numPages,page:e.page,crop:e.crop,pageCrops:e.pageCrops,marks:e.marks,tempo:e.tempo,youtube:e.youtube,hash};
         await dbPut(meta,new Blob([buf],{type:'application/pdf'}));
         byId.set(meta.id,meta);if(!weak(hash))byHash.set(hash,meta);added++;
       }catch(err){bad++}
@@ -1262,8 +1353,6 @@ async function exportPdf(target,btn,asBytes){
     const doc=await PDFDocument.load(await rec.blob.arrayBuffer(),{ignoreEncryption:true});
     const font=await doc.embedFont(StandardFonts.HelveticaBold);
     const col=h=>rgb(parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255);
-    const cr=m.crop||{},cl=(cr.l||0)/100,cR=(cr.r||0)/100,ct=(cr.t||0)/100,cBot=(cr.b||0)/100;
-    const hasCrop=cl||cR||ct||cBot;
     const snipCache=new Map();
     for(const [idx,pg] of doc.getPages().entries()){
       const box=pg.getCropBox(),rot=((pg.getRotation().angle%360)+360)%360;
@@ -1290,7 +1379,10 @@ async function exportPdf(target,btn,asBytes){
           continue;
         }
         const c=col(k.c);
-        if(k.t==='circle'){
+        if(k.t==='line'){
+          const[x1,y1]=map(k.x1,k.y1),[x2,y2]=map(k.x2,k.y2);
+          pg.drawLine({start:{x:x1,y:y1},end:{x:x2,y:y2},thickness:Math.max(.5,k.w*Wd),color:c,lineCap:LineCapStyle.Round});
+        }else if(k.t==='circle'){
           const[x,y]=map(k.cx,k.cy);
           pg.drawCircle({x,y,size:k.r*Wd,borderColor:c,borderWidth:Math.max(.5,k.w*Wd),borderOpacity:1,...(k.f?{color:c,opacity:.3}:{})});
         }else if(k.t==='rect'){
@@ -1305,7 +1397,8 @@ async function exportPdf(target,btn,asBytes){
           pg.drawText(t,{x:px,y:py,size,font,color:c,rotate:degrees(rot)});
         }
       }
-      if(hasCrop){
+      const cr=cropOf(m,idx),cl=(cr.l||0)/100,cR=(cr.r||0)/100,ct=(cr.t||0)/100,cBot=(cr.b||0)/100;
+      if(cl||cR||ct||cBot){
         const[a,b]=map(cl,ct),[e,f]=map(1-cR,1-cBot);
         pg.setCropBox(Math.min(a,e),Math.min(b,f),Math.abs(e-a),Math.abs(f-b));
       }
@@ -1332,13 +1425,14 @@ async function exportPdf(target,btn,asBytes){
 /* ---------- Save (edit mode): flatten every visual edit + the crop into the stored PDF, keep tempo metadata ---------- */
 /* Tempo systems are stored as fractions of the FULL page. Once the crop is baked into the file the page itself is the
    cropped area, so every system box is re-expressed relative to it (measure counts, BPM, on/off flags are untouched). */
-function remapTempo(T,cr){
-  const l=(cr.l||0)/100,r=(cr.r||0)/100,t=(cr.t||0)/100,b=(cr.b||0)/100;
-  if(!T||!(l||r||t||b))return{tempo:T,dropped:0};
-  const w=1-l-r,h=1-t-b,out=cloneJSON(T),cl=v=>Math.max(0,Math.min(1,v));
+function remapTempo(T,cropFn){
+  if(!T)return{tempo:T,dropped:0};
+  const out=cloneJSON(T),cl=v=>Math.max(0,Math.min(1,v));
   let dropped=0;
   for(const k of Object.keys(out.pages||{})){
-    const list=[];
+    const cr=cropFn(k)||{},l=(cr.l||0)/100,r=(cr.r||0)/100,t=(cr.t||0)/100,b=(cr.b||0)/100;
+    if(!(l||r||t||b))continue;
+    const w=1-l-r,h=1-t-b,list=[];
     for(const s of out.pages[k]){
       const x0=cl((s.x0-l)/w),x1=cl((s.x1-l)/w),y0=cl((s.y0-t)/h),y1=cl((s.y1-t)/h);
       if(x1-x0>.01&&y1-y0>.004)list.push({...s,x0,x1,y0,y1});else dropped++;
@@ -1352,7 +1446,7 @@ async function flattenAll(){
   const m=current,n=m.numPages||pages.length;
   if(pages.length<n){toast('Wait until all pages have loaded');return}
   if(!window.PDFLib){toast('PDF tools could not load. Check your connection.');return}
-  const cr=m.crop||{},hasCrop=!!(cr.l||cr.r||cr.t||cr.b);
+  const cr=m.crop||{},pcs=m.pageCrops||{},pcKeys=Object.keys(pcs).filter(k=>{const c=pcs[k];return c&&(c.l||c.r||c.t||c.b)}),hasCrop=!!(cr.l||cr.r||cr.t||cr.b)||pcKeys.length>0;
   let edits=0,erasures=0,snips=0;
   for(const k of Object.keys(m.marks||{}))for(const x of m.marks[k]){if(!validMark(x))continue;if(x.t==='erase')erasures++;else if(x.t==='snip')snips++;else edits++}
   if(!edits&&!erasures&&!snips&&!hasCrop){toast('Nothing to save yet: no markups, erasures, snippets or crop');return}
@@ -1360,7 +1454,7 @@ async function flattenAll(){
   if(edits)parts.push(edits+' markup'+(edits===1?'':'s'));
   if(erasures)parts.push(erasures+' erasure'+(erasures===1?'':'s'));
   if(snips)parts.push(snips+' pasted snippet'+(snips===1?'':'s'));
-  if(hasCrop)parts.push('your crop (L '+(cr.l||0)+'%, R '+(cr.r||0)+'%, T '+(cr.t||0)+'%, B '+(cr.b||0)+'%)');
+  if(hasCrop)parts.push(pcKeys.length?('your crop ('+((cr.l||cr.r||cr.t||cr.b)?'the document crop plus ':'')+pcKeys.length+' page'+(pcKeys.length===1?'':'s')+' with their own crop)'):'your crop (L '+(cr.l||0)+'%, R '+(cr.r||0)+'%, T '+(cr.t||0)+'%, B '+(cr.b||0)+'%)');
   const ok=await confirmAct('Save and flatten?','This permanently merges '+parts.join(', ')+' into the PDF file'+(hasCrop?' and trims every page to the crop':'')+'. It can\u2019t be undone, so export a backup first if you may need the original. Your tempo boxes, BPM, beats and other tempo settings are kept'+(hasCrop?' and re-fitted to the cropped pages':'')+'.','Save');
   if(!ok)return;
   const wasEdit=document.body.classList.contains('edit'),idx=cur;
@@ -1368,8 +1462,8 @@ async function flattenAll(){
   const bytes=await exportPdf(m,$('saveFlat'),true);
   if(!bytes)return;
   try{
-    const rt=remapTempo(m.tempo,cr);
-    const nm={...m,crop:{l:0,r:0,t:0,b:0},marks:{},tempo:rt.tempo,page:idx,updated:Date.now(),hash:await sha256(bytes)};
+    const rt=remapTempo(m.tempo,k=>cropOf(m,+k));
+    const nm={...m,crop:{l:0,r:0,t:0,b:0},pageCrops:{},marks:{},tempo:rt.tempo,page:idx,updated:Date.now(),hash:await sha256(bytes)};
     await dbPut(nm,new Blob([bytes],{type:'application/pdf'}));
     await openDoc(nm);if(wasEdit)setEdit(true);
     toast('Saved: your edits are now part of the PDF'+(rt.dropped?' ('+rt.dropped+' tempo box'+(rt.dropped===1?'':'es')+' lay outside the crop and were removed)':''));
@@ -1422,7 +1516,7 @@ async function modifyPages(op,idx){
     const marks=shiftPageKeys(m.marks,op,idx,l=>cloneJSON(l).map(x=>({...x,id:uid()})));
     const tempoNew=m.tempo?{...cloneJSON(m.tempo),pages:shiftPageKeys(m.tempo.pages,op,idx,l=>cloneJSON(l))}:m.tempo;
     const landing=op==='dup'?idx+1:Math.min(cur>idx?cur-1:(cur===idx?idx:cur),newN-1);
-    const nm={...m,crop:{...m.crop},marks,tempo:tempoNew,numPages:newN,page:landing,updated:Date.now(),hash:await sha256(bytes)};
+    const nm={...m,crop:{...m.crop},pageCrops:shiftPageKeys(m.pageCrops,op,idx,v=>cloneJSON(v)),marks,tempo:tempoNew,numPages:newN,page:landing,updated:Date.now(),hash:await sha256(bytes)};
     await dbPut(nm,new Blob([bytes],{type:'application/pdf'}));
     await openDoc(nm);
     if(wasEdit)setEdit(true);
@@ -1488,6 +1582,7 @@ function cleanTempo(t){
 }
 function buildTempo(){
   const tv=$('tv');trkEl=null;if(!tv||!pages[cur])return;
+  document.body.classList.toggle('notempo',!sysOf(cur).length);
   const nw=pages[cur].el.width,nh=pages[cur].el.height,T=tempo(),sy=sysOf(cur),S=1/(viewS||1);
   const calib=document.body.classList.contains('calib'),panel=$('tempobar').classList.contains('open');
   tv.replaceChildren();
@@ -1806,7 +1901,7 @@ tvUI();
 function pendingEdits(m){
   let n=0;const marks=m.marks||{};
   for(const k of Object.keys(marks))for(const x of (marks[k]||[]))if(validMark(x))n++;
-  const c=m.crop||{},crop=!!(c.l||c.r||c.t||c.b);
+  const c=m.crop||{},crop=!!(c.l||c.r||c.t||c.b)||Object.values(m.pageCrops||{}).some(x=>x&&(x.l||x.r||x.t||x.b));
   return{n,crop,any:n>0||crop};
 }
 
@@ -1881,21 +1976,42 @@ $('sMic').onclick=()=>{wantOn?stopVoice():startVoice();setTimeout(syncAudioUI,15
 
 /* ---------- voice commands ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null,wantOn=false,lastCmd=0,tt=null,micAlert=false,micWhy='',micQuick=0,micStartedAt=0,permWatch=false;
+let rec=null,wantOn=false,lastCmd=0,tt=null,micAlert=false,micWhy='',micQuick=0,micStartedAt=0,permWatch=false,micRetry=0,micRetryTimer=null,micAliveTimer=null,micReconn=false;
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2200)}
 function micState(){
-  const m=$('mic');m.classList.toggle('primary',wantOn&&!micAlert);m.classList.toggle('alert',micAlert);
-  m.textContent=micAlert?'🎤 Lost':(wantOn?'🎤 On':'🎤');
-  m.setAttribute('aria-label',micAlert?'Microphone lost. Tap to retry voice commands':(wantOn?'Voice commands on':'Voice commands'));
+  const m=$('mic');m.classList.toggle('primary',wantOn&&!micAlert&&!micReconn);m.classList.toggle('alert',micAlert);m.classList.toggle('reconn',micReconn&&!micAlert);
+  m.textContent=micAlert?'🎤 Lost':(micReconn?'🎤 …':(wantOn?'🎤 On':'🎤'));
+  m.setAttribute('aria-label',micAlert?'Microphone lost. Tap to retry voice commands':(micReconn?'Microphone disconnected, reconnecting (attempt '+micRetry+' of 3)':(wantOn?'Voice commands on':'Voice commands')));
+  const q=$('bMic');
+  if(q){
+    q.classList.toggle('on',wantOn&&!micAlert&&!micReconn);q.classList.toggle('alert',micAlert);q.classList.toggle('reconn',micReconn&&!micAlert);q.setAttribute('aria-pressed',wantOn&&!micAlert?'true':'false');
+    q.setAttribute('aria-label',micAlert?'Microphone lost. Tap to retry voice commands':(micReconn?'Microphone disconnected, reconnecting (attempt '+micRetry+' of 3). Tap to turn voice off':(wantOn?'Voice commands on. Tap to turn off':'Voice commands off. Tap to turn on')));
+    q.querySelector('.lbl').textContent=micAlert?' Lost':(micReconn?' Reconnecting…':(wantOn?' On':' Off'));
+  }
   const bn=$('micBanner');bn.hidden=!micAlert;if(micAlert)bn.textContent='🎤 Voice lost: '+(micWhy||'microphone unavailable')+'. Tap to retry';
   updateNav();
 }
 /* Voice was switched ON and the microphone then dropped (permission revoked, input unplugged, recognition crashed):
    stop retrying, turn the mic icon and a banner bright red, and keep them red until listening is restored or voice is switched off. */
 function micLost(why,hint){
-  wantOn=false;micAlert=true;micWhy=why;
+  wantOn=false;micAlert=true;micWhy=why;micRetry=0;micReconn=false;clearTimeout(micRetryTimer);micRetryTimer=null;clearTimeout(micAliveTimer);
   try{rec&&rec.stop()}catch(_){}
   micState();toast('Voice commands stopped: '+why+(hint?' ('+hint+')':''));
+}
+/* Unexpected disconnection while voice is ON: quietly try to reconnect up to 3 times (after 0.4 s, 1 s, 2 s) and show the
+   red alert only if all three attempts fail. A connection that stays up for 3 s counts as healthy and resets the count. */
+const MIC_RETRIES=3,MIC_DELAYS=[400,1000,2000];
+function micDrop(why){
+  if(!wantOn||micRetryTimer)return;
+  if(micRetry>=MIC_RETRIES){micLost(why+' (still failing after '+MIC_RETRIES+' reconnect attempts)');return}
+  const n=++micRetry;micReconn=true;clearTimeout(micAliveTimer);micState();
+  toast('Microphone disconnected ('+why+'). Reconnecting, attempt '+n+' of '+MIC_RETRIES+'…');
+  try{if(rec){rec.onend=null;rec.onerror=null;if(rec.abort)rec.abort();else rec.stop()}}catch(_){}
+  micRetryTimer=setTimeout(()=>{
+    micRetryTimer=null;
+    if(!wantOn)return;
+    try{makeRec();micStartedAt=Date.now();rec.start()}catch(_){micDrop(why)}
+  },MIC_DELAYS[n-1]);
 }
 function watchMicPermission(){
   if(permWatch||!navigator.permissions||!navigator.permissions.query)return;
@@ -1945,10 +2061,10 @@ function runCommand(c){
     }break;
   }
 }
-function startVoice(){
-  if(!SR){toast('Voice commands aren’t supported in this browser. Try Chrome, Edge or Safari.');return}
-  rec=new SR();rec.lang='en-US';rec.continuous=true;rec.interimResults=false;rec.maxAlternatives=3;
+function makeRec(){
+  const my=rec=new SR();rec.lang='en-US';rec.continuous=true;rec.interimResults=false;rec.maxAlternatives=3;
   rec.onresult=e=>{
+    if(my!==rec)return;
     for(let i=e.resultIndex;i<e.results.length;i++){
       const r=e.results[i];if(!r.isFinal)continue;
       let done=false;
@@ -1965,27 +2081,38 @@ function startVoice(){
       if(!done)heard(r[0].transcript,r[0].confidence||0,'not a command');
     }
   };
-  rec.onstart=()=>{micStartedAt=Date.now();if(micAlert){micAlert=false;micWhy='';micState()}};
+  rec.onstart=()=>{
+    if(my!==rec)return;
+    micStartedAt=Date.now();
+    clearTimeout(micAliveTimer);micAliveTimer=setTimeout(()=>{micRetry=0},3000);
+    if(micAlert||micReconn){const was=micReconn;micAlert=false;micReconn=false;micWhy='';micState();if(was)toast('Microphone reconnected')}
+  };
   rec.onerror=e=>{
+    if(my!==rec)return;
     const er=e&&e.error;
     if(er==='no-speech'||er==='aborted')return;
     if(er==='not-allowed'||er==='service-not-allowed')micLost('blocked or permission revoked','allow microphone access, or open the app in its own browser tab');
-    else if(er==='audio-capture')micLost('microphone not available');
-    else if(er==='network')micLost('no internet connection');
-    else micLost('microphone error ('+er+')');
+    else if(er==='audio-capture')micDrop('microphone not available');
+    else if(er==='network')micDrop('no internet connection');
+    else micDrop('microphone error ('+er+')');
   };
   rec.onend=()=>{
-    if(!wantOn)return;
-    micQuick=(Date.now()-micStartedAt<800)?micQuick+1:0;
-    if(micQuick>=4){micLost('input keeps stopping');return}
-    setTimeout(()=>{if(!wantOn)return;try{micStartedAt=Date.now();rec.start()}catch(_){micLost('could not restart the microphone')}},300);
+    if(my!==rec||!wantOn||micRetryTimer)return;
+    if(Date.now()-micStartedAt<800){micDrop('input keeps stopping');return}
+    setTimeout(()=>{if(my!==rec||!wantOn||micRetryTimer)return;try{micStartedAt=Date.now();rec.start()}catch(_){micDrop('could not restart the microphone')}},300);
   };
-  micAlert=false;micWhy='';micQuick=0;micStartedAt=Date.now();
+  return rec;
+}
+function startVoice(){
+  if(!SR){toast('Voice commands aren’t supported in this browser. Try Chrome, Edge or Safari.');return}
+  makeRec();
+  micAlert=false;micWhy='';micQuick=0;micRetry=0;micReconn=false;clearTimeout(micRetryTimer);micRetryTimer=null;micStartedAt=Date.now();
   wantOn=true;micState();watchMicPermission();
   try{rec.start();toast('Listening… say “go” or “back”')}catch(err){micLost('could not start the microphone')}
 }
-function stopVoice(){wantOn=false;micAlert=false;micWhy='';micState();try{rec&&rec.stop()}catch(_){}}
+function stopVoice(){wantOn=false;micAlert=false;micWhy='';micRetry=0;micReconn=false;clearTimeout(micRetryTimer);micRetryTimer=null;clearTimeout(micAliveTimer);micState();try{rec&&rec.stop()}catch(_){}}
 $('micBanner').onclick=()=>startVoice();
+$('bMic').onclick=()=>wantOn?stopVoice():startVoice();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&micAlert)startVoice()});
 $('mic').onclick=()=>wantOn?stopVoice():startVoice();
 

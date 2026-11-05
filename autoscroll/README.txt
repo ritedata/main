@@ -10,7 +10,7 @@ PARTITURA - installable app (PWA)
 
 Files: index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png,
 icon-maskable-512.png, apple-touch-icon.png. Keep them together in one folder.
-When you change a file, raise the version number in sw.js (partitura-v25 -> v26).
+When you change a file, raise the version number in sw.js (partitura-v26 -> v27).
 
 BACKUP / SYNC BETWEEN DEVICES (environment backup, format v2)
 Library screen > Export library saves one ZIP (library.json + the PDFs).
@@ -46,3 +46,10 @@ OPENING, ALERTS AND BADGES
 - Crop / Light / Tempo / Edit turn yellow while their tool is open.
 - A yellow "Pending Flatten" badge on a library card means unsaved edits or a crop; Edit > Save clears it.
 - Fit mode has a Hide/Show tempos toggle for a clean sheet (the scanning line keeps running).
+
+LINE TOOL, CROP SCOPE, MIC RECONNECT
+- Edit > Line: drag to draw a straight line (Shift snaps to 15 degrees); colour and S/M/L/XL width apply.
+- Crop panel: "All pages" or "This page only". Page crops are saved, exported, and applied by Save.
+- Fit mode: Play / Reset / Show-Hide tempos appear only on pages that have tempo boxes; a Mic on/off button sits beside Next.
+- If the microphone drops while voice is on, the app retries 3 times (amber) before the red alert.
+- A "Page 1" button appears beside Previous from page 2 onward.
