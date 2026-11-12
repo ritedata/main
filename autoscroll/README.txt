@@ -10,7 +10,7 @@ PARTITURA - installable app (PWA)
 
 Files: index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png,
 icon-maskable-512.png, apple-touch-icon.png. Keep them together in one folder.
-When you change a file, raise the version number in sw.js (partitura-v26 -> v27).
+When you change a file, raise the version number in sw.js (partitura-v27 -> v28).
 
 BACKUP / SYNC BETWEEN DEVICES (environment backup, format v2)
 Library screen > Export library saves one ZIP (library.json + the PDFs).
@@ -53,3 +53,9 @@ LINE TOOL, CROP SCOPE, MIC RECONNECT
 - Fit mode: Play / Reset / Show-Hide tempos appear only on pages that have tempo boxes; a Mic on/off button sits beside Next.
 - If the microphone drops while voice is on, the app retries 3 times (amber) before the red alert.
 - A "Page 1" button appears beside Previous from page 2 onward.
+
+FOOT PEDALS (Bluetooth / MIDI page turners)
+Library screen > "Pedal". Bluetooth pedals (AirTurn, PageFlip, ...) work in keyboard mode once paired in the device's
+Bluetooth settings; MIDI pedals need "Enable MIDI" (Chrome/Edge; not Safari/iPhone; needs https). Defaults:
+Pedal 1 = next page (next tempo box while the line plays), Pedal 2 = previous page (restart loop while it plays).
+Use "Learn pedal" to map any key or MIDI note / controller / program change to 14 actions. Mappings are stored per device.

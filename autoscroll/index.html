@@ -120,7 +120,27 @@ body.focus:not(.lib) .pn{display:block}
 body.focus #exitFit{display:inline-flex}
 body.lib #bar,body.lib #cropbar,body.lib #cropBtn,body.lib #lightBtn,body.lib #lightbar,body.lib #tempoBtn,body.lib #tempobar,body.lib #editBtn,body.lib #saveBtn,body.lib #editbar,body.lib #fit,body.lib #libBtn{display:none}
 /* mic and Audio controls live on the main (library) screen only; hidden, not removed, so their state and settings are untouched */
-body:not(.lib) #mic,body:not(.lib) #setBtn{display:none}
+body:not(.lib) #mic,body:not(.lib) #setBtn,body:not(.lib) #pedalBtn{display:none}
+#pedalDlg{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:0;border:0;border-radius:0;background:var(--bg)}
+#pedalDlg::backdrop{background:var(--bg)}
+.pd-wrap{display:flex;flex-direction:column;height:100%}
+.pd-head{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pd-head h3{margin:0;flex:1}
+.pd-body{flex:1;overflow:auto;padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 18px);max-width:780px;width:100%;margin:0 auto}
+.pd-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;background:var(--surface)}
+.pd-card h4{margin:0 0 6px}
+.pd-r{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.pd-r.first{border-top:0}
+.pd-r.key{background:rgba(232,121,74,.1);border-radius:10px;padding:10px;margin:4px 0;border:1px solid rgba(232,121,74,.35)}
+.pd-r.hit{outline:2px solid #ffd600}
+.pd-c{display:flex;flex-wrap:wrap;gap:6px}
+.pd-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 10px;font-size:.82rem}
+.pd-x{padding:0 7px!important;min-width:26px;min-height:22px;border-radius:999px!important;font-size:.8rem}
+.pd-none{color:var(--muted);font-size:.82rem}
+.pd-learn{align-self:flex-start;padding:6px 12px}
+.pd-learn.on{background:#ffb300;border-color:#ffb300;color:#1d1b18;font-weight:700}
+.pd-mon{padding:10px;border:1px dashed var(--line);border-radius:10px;min-height:2.6em;font-size:.9rem}
+.pd-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:14px;width:min(440px,92vw)}
 dialog h3{margin:0 0 6px}
 dialog input[type=text]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin-top:8px}
@@ -218,6 +238,7 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <span id="zoomGrp" role="group" aria-label="Zoom"><button id="zOut" aria-label="Zoom out" title="Zoom out (-)">−</button><button id="zReset" aria-label="Reset zoom: fit to screen" title="Reset zoom: fit to screen (0)">100%</button><button id="zIn" aria-label="Zoom in" title="Zoom in (+). Pinch or Ctrl+wheel also zoom.">+</button></span>
   <button id="mic" title="Voice commands">🎤</button>
   <button id="setBtn" title="Microphone sensitivity, volume and page-turn beep">⚙ Audio</button>
+  <button id="pedalBtn" title="Foot pedal setup: Bluetooth or MIDI page turners">🦶 Pedal</button>
 </header>
 
 <button id="micBanner" hidden aria-live="assertive"></button>
@@ -312,6 +333,32 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <label class="srow">Output volume <output id="ovv">60%</output><input id="ovol" type="range" min="0" max="100" step="1" value="60"></label>
   <label class="chk"><input id="beepOn" type="checkbox" checked> Beep when a page turns</label>
   <div class="row"><button id="sTest">🔊 Test beep</button><button id="sClose" class="primary">Done</button></div>
+</dialog>
+<dialog id="pedalDlg" aria-label="Foot pedal setup">
+  <div class="pd-wrap">
+    <div class="pd-head"><h3>🦶 Foot pedal setup</h3><button id="pdClose" class="primary">Done</button></div>
+    <div class="pd-body">
+      <section class="pd-card">
+        <h4>1 · Connect your pedal</h4>
+        <p class="hint"><b>Bluetooth page turners</b> (AirTurn, PageFlip, iRig BlueTurn …): pair the pedal in your phone, tablet or computer’s Bluetooth settings and put it in <b>keyboard mode</b>. It then works straight away: every pedal press arrives as a key press that you can map below.</p>
+        <p class="hint"><b>MIDI pedals</b> (Bluetooth or USB MIDI): pair or plug in the pedal, then tap Enable MIDI. Works in Chrome and Edge on Android, Windows, Mac, Linux and ChromeOS. Safari and iPhone do not support web MIDI, so use keyboard mode there.</p>
+        <div class="pd-tools"><button id="pdMidi">Enable MIDI</button></div>
+        <div id="pdMidiState" class="hint"></div>
+        <div id="pdDevices" class="hint"></div>
+      </section>
+      <section class="pd-card">
+        <h4>2 · Test</h4>
+        <div id="pdMonitor" class="pd-mon" role="status" aria-live="polite">Press a pedal… (while this screen is open, pedals only show what they would do)</div>
+        <label class="chk"><input type="checkbox" id="pdSmart"> <span>Smart pedals: while the tempo line is <b>playing</b>, Pedal 1 jumps to the <b>next tempo box</b> and Pedal 2 <b>restarts the loop</b>. Otherwise they turn pages.</span></label>
+      </section>
+      <section class="pd-card">
+        <h4>3 · Map pedals to actions</h4>
+        <p class="hint">Tap <b>＋ Learn pedal</b> on an action, then press the pedal (or any key, or send a MIDI note / controller). An action can have several triggers, and a trigger belongs to one action: assigning it again moves it.</p>
+        <div id="pdRows"></div>
+        <div class="pd-tools"><button id="pdReset">Reset to defaults</button><button id="pdClear">Clear all mappings</button></div>
+      </section>
+    </div>
+  </div>
 </dialog>
 <dialog id="pgDlg" style="width:min(660px,94vw)">
   <h3 style="margin:0 0 4px">Pages</h3>
@@ -665,16 +712,7 @@ document.addEventListener('keydown',e=>{
     if(e.code==='KeyC'&&regionSel){e.preventDefault();copyRegion();return}
     if(e.code==='KeyV'&&clip){e.preventDefault();pasteSnippet();return}
   }
-  if(current&&pages.length&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
-    if(e.code==='KeyP'){e.preventDefault();tempoToggle();return}
-    if(e.code==='KeyT'){e.preventDefault();tapTempo();return}
-    if(e.code==='KeyR'){e.preventDefault();tempoReset();return}
-  }
-  if(['ArrowRight','PageDown','Space','Enter'].includes(e.code)){e.preventDefault();next()}
-  else if(['ArrowLeft','PageUp','Backspace'].includes(e.code)){e.preventDefault();prev()}
-  else if(e.code==='Escape')setFocus(false);
-  else if(e.code==='Home')turn(0);
-  else if(e.code==='End')turn(pages.length-1);
+  if(e.code==='Escape')setFocus(false);
 });
 view.addEventListener('click',e=>{
   if(!pages.length||document.body.classList.contains('edit')||document.body.classList.contains('calib'))return;
@@ -1918,6 +1956,197 @@ if(window.MutationObserver){
   for(const el of [document.body,$('cropbar'),$('lightbar'),$('tempobar')])mo.observe(el,{attributes:true,attributeFilter:['class']});
 }
 syncActive();
+
+/* ---------- foot pedals: Bluetooth (keyboard-mode) and MIDI page turners, mapped to app actions ----------
+   A pedal is just an input device that produces a TRIGGER: a key press (k:<KeyboardEvent.code>) or a MIDI message
+   (m:n note-on, m:c control-change pressed past 64, m:p program-change, each with its channel). Triggers are mapped to
+   ACTIONS; the mapping lives in localStorage (it belongs to the device the pedal is paired with, not to the library). */
+function tempoNextBox(){
+  if(!current||!pages.length)return;
+  if(!sysOf(cur).length){toast('No tempo boxes on this page');return}
+  tp.started=true;tp.frac=0;if(tp.running)tp.last=performance.now();
+  nextSystem();buildTempo();moveTracker();
+}
+function tempoRestartLoop(){
+  if(!current||!pages.length)return;
+  const sy=sysOf(cur);if(!sy.length){toast('No tempo boxes on this page');return}
+  tp.sys=Math.max(0,firstOn(sy,0));tp.frac=0;tp.started=true;if(tp.running)tp.last=performance.now();
+  buildTempo();moveTracker();toast('Loop restarted at System 1');
+}
+const PEDAL_ACTIONS={
+  smartNext:{pedal:'Pedal 1',label:'Next page, or next tempo box while the tempo line is playing',run:()=>{pedalCfg.smart&&tp.running?tempoNextBox():next()}},
+  smartPrev:{pedal:'Pedal 2',label:'Previous page, or restart the loop while the tempo line is playing',run:()=>{pedalCfg.smart&&tp.running?tempoRestartLoop():prev()}},
+  nextPage:{label:'Next page',run:()=>{next()}},
+  prevPage:{label:'Previous page',run:()=>{prev()}},
+  firstPage:{label:'Go to page 1',run:()=>{turn(0)}},
+  lastPage:{label:'Go to the last page',run:()=>{turn(pages.length-1)}},
+  nextTempo:{label:'Next tempo box',run:()=>tempoNextBox()},
+  restartLoop:{label:'Restart loop (back to System 1)',run:()=>tempoRestartLoop()},
+  playPause:{label:'Play / Pause the tempo line',run:()=>tempoToggle()},
+  resetTempo:{label:'Reset the tempo line (pause at System 1)',run:()=>tempoReset()},
+  tapTempo:{label:'Tap tempo',run:()=>tapTempo()},
+  toggleTempos:{label:'Show / hide tempo boxes (Fit mode)',run:()=>{tvHide=!tvHide;lsSet('tvis',tvHide?'0':'1');tvUI();toast(tvHide?'Tempo boxes hidden':'Tempo boxes shown')}},
+  toggleFit:{label:'Fit mode on / off',run:()=>setFocus(!document.body.classList.contains('focus'))},
+  toggleMic:{label:'Voice commands on / off',run:()=>{wantOn?stopVoice():startVoice()}}
+};
+const PEDAL_DEFAULTS={
+  smartNext:['k:ArrowRight','k:PageDown','k:Space','k:Enter'],smartPrev:['k:ArrowLeft','k:PageUp','k:Backspace'],
+  nextPage:[],prevPage:[],firstPage:['k:Home'],lastPage:['k:End'],nextTempo:[],restartLoop:[],
+  playPause:['k:KeyP'],resetTempo:['k:KeyR'],tapTempo:['k:KeyT'],toggleTempos:[],toggleFit:[],toggleMic:[]
+};
+const SIG_OK=/^(k:[A-Za-z0-9]{1,30}|m:[ncp]:\d{1,2}:\d{1,3})$/;
+function loadPedalCfg(){
+  let c={};try{c=JSON.parse(lsGet('pedalCfg','{}'))||{}}catch(e){}
+  const bind={};
+  for(const a of Object.keys(PEDAL_DEFAULTS)){
+    const mine=c.bind&&c.bind[a];
+    bind[a]=Array.isArray(mine)?mine.filter(s=>typeof s==='string'&&SIG_OK.test(s)):PEDAL_DEFAULTS[a].slice();
+  }
+  return{smart:c.smart!==false,midi:!!c.midi,bind};
+}
+let pedalCfg=loadPedalCfg(),sigMap=new Map(),pedalScrOpen=false,learning=null,midiAccess=null;
+const lastFire={},ccState={};
+function rebuildSigMap(){sigMap=new Map();for(const a of Object.keys(PEDAL_ACTIONS))for(const s of pedalCfg.bind[a]||[])if(!sigMap.has(s))sigMap.set(s,a)}
+function savePedalCfg(){lsSet('pedalCfg',JSON.stringify(pedalCfg));rebuildSigMap()}
+rebuildSigMap();
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function sigLabel(s){
+  let m;
+  if((m=s.match(/^k:(.+)$/))){
+    const nice={ArrowRight:'→ Arrow Right',ArrowLeft:'← Arrow Left',ArrowUp:'↑ Arrow Up',ArrowDown:'↓ Arrow Down',PageDown:'Page Down',PageUp:'Page Up'}[m[1]];
+    return 'Key '+(nice||m[1].replace(/^Key/,'').replace(/^Digit/,''));
+  }
+  if((m=s.match(/^m:n:(\d+):(\d+)$/)))return 'MIDI note '+NOTE_NAMES[+m[2]%12]+(Math.floor(+m[2]/12)-1)+' · ch '+m[1];
+  if((m=s.match(/^m:c:(\d+):(\d+)$/)))return 'MIDI controller '+m[2]+' · ch '+m[1];
+  if((m=s.match(/^m:p:(\d+):(\d+)$/)))return 'MIDI program '+m[2]+' · ch '+m[1];
+  return s;
+}
+function assignSig(action,sig){
+  for(const a of Object.keys(pedalCfg.bind))pedalCfg.bind[a]=pedalCfg.bind[a].filter(s=>s!==sig);
+  pedalCfg.bind[action].push(sig);learning=null;savePedalCfg();pdRender();pdShow(sig);
+  toast(sigLabel(sig)+' → '+(PEDAL_ACTIONS[action].pedal||PEDAL_ACTIONS[action].label));
+}
+/* one entry point for every pedal signal, keyboard or MIDI; returns true when the signal was used */
+function pedalSignal(sig,e){
+  if(pedalScrOpen){
+    if(learning){if(e)e.preventDefault();assignSig(learning,sig);return true}
+    pdShow(sig);return false;
+  }
+  const act=sigMap.get(sig);if(!act)return false;
+  if(!(current&&pages.length)&&act!=='toggleMic')return false;
+  const now=performance.now();
+  if(now-(lastFire[sig]||0)<120){if(e)e.preventDefault();return true}
+  lastFire[sig]=now;if(e)e.preventDefault();
+  try{PEDAL_ACTIONS[act].run()}catch(err){console.error(err)}
+  return true;
+}
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(!e.code||/^(Shift|Control|Alt|Meta)(Left|Right)?$/.test(e.code))return;
+  const sig='k:'+e.code;
+  if(pedalScrOpen){
+    if(learning){
+      if(e.code==='Escape'){e.preventDefault();learning=null;pdRender();return}
+      if(e.repeat)return;
+      e.preventDefault();e.stopImmediatePropagation();assignSig(learning,sig);return;
+    }
+    pdShow(sig);return;
+  }
+  const t=e.target;
+  if(t&&(t.tagName==='TEXTAREA'||t.isContentEditable||(t.tagName==='INPUT'&&/^(text|number|range|search|url|email)$/.test(t.type))))return;
+  if(document.querySelector('dialog[open]'))return;
+  if(!sigMap.has(sig))return;
+  if(zActive()&&e.code==='Space')return;
+  if((e.code==='Delete'||e.code==='Backspace')&&((document.body.classList.contains('edit')&&sel)||(selSys&&(document.body.classList.contains('calib')||tool==='tbox'))))return;
+  if(e.repeat){if(current&&pages.length)e.preventDefault();return}
+  if(pedalSignal(sig,e))e.stopImmediatePropagation();
+},true);
+/* ---- MIDI ---- */
+function onMidi(ev){
+  const d=ev.data;if(!d||d.length<2)return;
+  const st=d[0];if(st>=0xf0)return;
+  const cmd=st&0xf0,ch=(st&0x0f)+1,a=d[1],v=d.length>2?d[2]:0;
+  if(cmd===0x90&&v>0)pedalSignal('m:n:'+ch+':'+a,null);
+  else if(cmd===0xb0){const k=ch+':'+a,was=ccState[k]||0;ccState[k]=v;if(v>=64&&was<64)pedalSignal('m:c:'+ch+':'+a,null)}
+  else if(cmd===0xc0)pedalSignal('m:p:'+ch+':'+a,null);
+}
+function midiBind(){
+  if(!midiAccess)return;
+  for(const inp of midiAccess.inputs.values())inp.onmidimessage=onMidi;
+  pdDevices();pdMidiState();
+}
+async function midiEnable(){
+  if(!navigator.requestMIDIAccess){pdMidiState('Web MIDI is not available in this browser (Safari and iPhone do not support it). Put the pedal in keyboard mode instead.');return false}
+  try{midiAccess=await navigator.requestMIDIAccess({sysex:false})}
+  catch(err){pedalCfg.midi=false;savePedalCfg();pdMidiState('MIDI access was blocked. Allow it in the browser\u2019s site settings, then tap Enable MIDI again.');return false}
+  midiAccess.onstatechange=()=>midiBind();
+  pedalCfg.midi=true;savePedalCfg();midiBind();return true;
+}
+/* ---- setup screen ---- */
+function pdMidiState(msg){
+  const s=$('pdMidiState'),b=$('pdMidi');if(!s)return;
+  const n=midiAccess?[...midiAccess.inputs.values()].filter(i=>i.state!=='disconnected').length:0;
+  s.textContent=msg||(midiAccess?(n?'MIDI is on: '+n+' input'+(n===1?'':'s')+' connected.':'MIDI is on, but no MIDI device is connected yet. Pair or plug in the pedal.'):(navigator.requestMIDIAccess?'MIDI is off.':'MIDI is not available in this browser.'));
+  b.textContent=midiAccess?'MIDI on \u2713':'Enable MIDI';b.disabled=!!midiAccess;
+}
+function pdDevices(){
+  const d=$('pdDevices');if(!d)return;
+  if(!midiAccess){d.textContent='';return}
+  const names=[...midiAccess.inputs.values()].filter(i=>i.state!=='disconnected').map(i=>i.name||i.id);
+  d.textContent=names.length?'Listening to: '+names.join(', '):'';
+}
+function pdShow(sig){
+  const m=$('pdMonitor');if(!m)return;
+  const act=sigMap.get(sig);
+  m.textContent='Last signal: '+sigLabel(sig)+'  \u2192  '+(act?(PEDAL_ACTIONS[act].pedal?PEDAL_ACTIONS[act].pedal+' \u00b7 ':'')+PEDAL_ACTIONS[act].label:'not mapped');
+  const r=act&&document.querySelector('.pd-r[data-action="'+act+'"]');
+  if(r){r.classList.add('hit');setTimeout(()=>r.classList.remove('hit'),600)}
+}
+function pdRender(){
+  const box=$('pdRows');if(!box)return;box.replaceChildren();
+  Object.keys(PEDAL_ACTIONS).forEach((a,i)=>{
+    const A=PEDAL_ACTIONS[a],row=document.createElement('div');row.className='pd-r'+(A.pedal?' key':'')+(i===0?' first':'');row.dataset.action=a;
+    const lab=document.createElement('div');
+    if(A.pedal){const b=document.createElement('b');b.textContent=A.pedal;lab.append(b,document.createTextNode(' \u00b7 '+A.label))}else lab.textContent=A.label;
+    const chips=document.createElement('div');chips.className='pd-c';
+    const list=pedalCfg.bind[a]||[];
+    if(!list.length){const n=document.createElement('span');n.className='pd-none';n.textContent='not mapped';chips.appendChild(n)}
+    for(const s of list){
+      const c=document.createElement('span');c.className='pd-chip';c.textContent=sigLabel(s);
+      const x=document.createElement('button');x.className='pd-x';x.textContent='\u2715';x.title='Remove '+sigLabel(s);x.setAttribute('aria-label','Remove '+sigLabel(s)+' from '+A.label);
+      x.onclick=()=>{pedalCfg.bind[a]=pedalCfg.bind[a].filter(q=>q!==s);savePedalCfg();pdRender()};
+      c.appendChild(x);chips.appendChild(c);
+    }
+    const lb=document.createElement('button');lb.className='pd-learn'+(learning===a?' on':'');
+    lb.textContent=learning===a?'Press the pedal now\u2026 (tap to cancel)':'\uff0b Learn pedal';
+    lb.setAttribute('aria-label',(learning===a?'Cancel learning for ':'Learn a pedal for ')+A.label);
+    lb.onclick=()=>{learning=learning===a?null:a;pdRender()};
+    row.append(lab,chips,lb);box.appendChild(row);
+  });
+}
+function openPedal(){
+  pedalScrOpen=true;learning=null;
+  $('pdSmart').checked=pedalCfg.smart;$('pdMonitor').textContent='Press a pedal\u2026 (while this screen is open, pedals only show what they would do)';
+  pdRender();pdMidiState();pdDevices();$('pedalDlg').showModal();
+}
+function closePedal(){pedalScrOpen=false;learning=null;if($('pedalDlg').open)$('pedalDlg').close()}
+$('pedalBtn').onclick=openPedal;$('pdClose').onclick=closePedal;
+$('pedalDlg').addEventListener('close',()=>{pedalScrOpen=false;learning=null});
+$('pedalDlg').addEventListener('cancel',e=>{if(learning){e.preventDefault();learning=null;pdRender()}});
+$('pdSmart').onchange=e=>{pedalCfg.smart=e.target.checked;savePedalCfg()};
+$('pdMidi').onclick=()=>midiEnable();
+$('pdReset').onclick=async()=>{
+  if(!await confirmAct('Reset pedal mappings?','Every pedal and key mapping returns to the defaults (Pedal 1 = next, Pedal 2 = previous, and the standard keyboard keys).','Reset'))return;
+  pedalCfg.bind={};for(const a of Object.keys(PEDAL_DEFAULTS))pedalCfg.bind[a]=PEDAL_DEFAULTS[a].slice();pedalCfg.smart=true;$('pdSmart').checked=true;savePedalCfg();pdRender();toast('Pedal mappings reset');
+};
+$('pdClear').onclick=async()=>{
+  if(!await confirmAct('Clear all mappings?','No pedal or key will do anything until you map it again with Learn.','Clear all'))return;
+  for(const a of Object.keys(pedalCfg.bind))pedalCfg.bind[a]=[];savePedalCfg();pdRender();toast('All pedal mappings cleared');
+};
+/* reconnect MIDI quietly when it was enabled before and the browser has already granted it */
+if(pedalCfg.midi&&navigator.requestMIDIAccess){
+  try{navigator.permissions.query({name:'midi',sysex:false}).then(s=>{if(s.state==='granted')midiEnable()}).catch(()=>{})}catch(e){}
+}
 
 /* ---------- brightness / contrast: a CSS filter on the page layer only (view-only; PDF data is never touched) ---------- */
 let bri=+lsGet('bri',100),con=+lsGet('con',100);
