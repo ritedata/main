@@ -205,6 +205,11 @@ body.calib #ov{pointer-events:auto;touch-action:none;cursor:crosshair}
 .srow2{display:flex;align-items:center;gap:6px;font-size:.85rem}
 .srow2 span{flex:1}
 .srow2 button{padding:3px 9px}
+.sbox{display:flex;flex-direction:column;gap:4px;padding:6px 0;border-top:1px solid var(--line)}
+.sbox.chg{border-left:4px solid var(--accent);padding-left:8px}
+.srow3{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+#tempobar .srow3 input[type=number]{width:64px;padding:4px 6px}
+.srow3 select{font:inherit;padding:4px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 .trow{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
 .trow button{flex:1;padding:7px 6px}
 #tColors{display:flex;gap:6px;align-items:center}
@@ -245,8 +250,11 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
 <div id="view"></div>
 
 <div id="tempobar">
-  <label>BPM <input id="tBpm" type="number" min="20" max="300" step="0.1" value="100" inputmode="decimal"></label>
-  <label>Beats / measure <input id="tBeats" type="number" min="1" max="16" step="1" value="4" inputmode="numeric"></label>
+  <label>Default BPM <input id="tBpm" type="number" min="20" max="300" step="0.1" value="100" inputmode="decimal"></label>
+  <label>Time sig. <input id="tBeats" type="number" min="1" max="16" step="1" value="4" inputmode="numeric" style="width:60px"> / <select id="tDen" aria-label="Note value of the time signature"><option>1</option><option>2</option><option selected>4</option><option>8</option><option>16</option><option>32</option></select></label>
+  <div class="hint full">BPM = beats (pulses) in 60 seconds, and a measure lasts as many pulses as the top number of the time signature. These are the defaults for this PDF. A box with its own BPM or time signature changes the tempo from that box onward, until a later box changes it again. Per box you can also set an end BPM (→) for a gradual speed-up or slow-down, place barlines so the line follows the real measures, and split a box to change the tempo partway along a staff row.</div>
+  <label class="chk full"><input type="checkbox" id="tSound"> <span>🔊 Metronome sound for this PDF (a box can switch it on or off for itself)</span></label>
+  <label>Count-in <select id="tCount" aria-label="Count-in before the line starts"><option value="0">Off</option><option value="1">1 measure</option><option value="2">2 measures</option></select></label>
   <div id="sysList"></div>
   <div class="trow"><button id="tCal">✎ Calibrate</button><button id="tPlay" class="primary">▶ Start</button><button id="tReset">⟲ Reset</button><button id="tTap">👆 Tap tempo</button></div>
   <label>Width <input id="tW" type="range" min="1" max="12" step="1" value="3"></label>
@@ -332,7 +340,11 @@ body.edit #ov .snh{pointer-events:auto;cursor:nwse-resize}
   <div class="row" style="justify-content:flex-start"><button id="sMic">🎤 Start listening to calibrate</button></div>
   <label class="srow">Output volume <output id="ovv">60%</output><input id="ovol" type="range" min="0" max="100" step="1" value="60"></label>
   <label class="chk"><input id="beepOn" type="checkbox" checked> Beep when a page turns</label>
-  <div class="row"><button id="sTest">🔊 Test beep</button><button id="sClose" class="primary">Done</button></div>
+  <label class="srow">Metronome volume <output id="mvv">70%</output><input id="mvol" type="range" min="0" max="100" step="1" value="70"></label>
+  <label class="srow">Click latency offset <output id="mlv">0 ms</output><input id="mlat" type="range" min="0" max="300" step="10" value="0"></label>
+  <div class="hint">Bluetooth headphones and speakers delay sound. Raise this until the click lines up with the yellow line: the click then sounds earlier, and the line waits this long when you press Play.</div>
+  <div class="hint">The metronome click is switched on per PDF in the Tempo panel. If voice commands are on, clicks can be picked up by the microphone, so headphones help.</div>
+  <div class="row"><button id="sTest">🔊 Test beep</button><button id="sClick">🥁 Test click</button><button id="sClose" class="primary">Done</button></div>
 </dialog>
 <dialog id="pedalDlg" aria-label="Foot pedal setup">
   <div class="pd-wrap">
@@ -1221,11 +1233,11 @@ function envStats(entries){
   return s;
 }
 const statsText=s=>s.pdfs+' PDF'+(s.pdfs===1?'':'s')+', '+s.cropped+' cropped, '+s.tempoGrids+' with tempo grids ('+s.systems+' systems), '+s.annotations+' annotations, '+s.erasures+' erasures'+(s.snippets?', '+s.snippets+' pasted snippet'+(s.snippets===1?'':'s'):'')+(s.links?', '+s.links+' YouTube link'+(s.links===1?'':'s'):'');
-const readSettings=()=>({bri,con,msens,ovol,beepOn,eraseSize});
+const readSettings=()=>({bri,con,msens,ovol,beepOn,eraseSize,mvol,mlat});
 function applySettings(s){
   if(!s||typeof s!=='object')return false;
   bri=Math.round(num(s.bri,30,170,100));con=Math.round(num(s.con,50,200,100));
-  msens=Math.round(num(s.msens,1,10,7));ovol=Math.round(num(s.ovol,0,100,60));beepOn=!!s.beepOn;eraseSize=Math.round(num(s.eraseSize,1,10,4));
+  msens=Math.round(num(s.msens,1,10,7));ovol=Math.round(num(s.ovol,0,100,60));beepOn=!!s.beepOn;eraseSize=Math.round(num(s.eraseSize,1,10,4));mvol=Math.round(num(s.mvol,0,100,70));lsSet('mvol',mvol);mlat=Math.round(num(s.mlat,0,300,0));lsSet('mlat',mlat);
   lsSet('bri',bri);lsSet('con',con);lsSet('msens',msens);lsSet('ovol',ovol);lsSet('beepOn',beepOn?'1':'0');lsSet('esz',eraseSize);
   try{applyLight();syncAudioUI();toolsUI()}catch(e){}
   return true;
@@ -1246,7 +1258,7 @@ async function exportLibrary(){
       const pr=pruneOrphans(m.marks,m.tempo,m.numPages||0);
       entries.push({id:m.id,title:m.title,author:m.author||'',pinned:!!m.pinned,added:m.added,updated:m.updated||m.added,numPages:m.numPages||0,page:m.page||0,crop:m.crop||{l:0,r:0,t:0,b:0},pageCrops:Object.fromEntries(Object.entries(m.pageCrops||{}).filter(([k])=>!(m.numPages>0&&+k>=m.numPages))),marks:pr.marks,tempo:pr.tempo||null,youtube:m.youtube||'',hash:m.hash||'',size:rec.blob.size,file});
     }
-    zip.file('library.json',JSON.stringify({format:'partitura-library',version:2,app:'Partitura',exportedAt:Date.now(),device:(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'',settings:readSettings(),summary:envStats(entries),entries},null,1));
+    zip.file('library.json',JSON.stringify({format:'partitura-library',version:(entries.some(e=>hasTempoOverrides(e.tempo))?3:2),app:'Partitura',exportedAt:Date.now(),device:(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'',settings:readSettings(),summary:envStats(entries),entries},null,1));
     const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
     await saveFile(blob,'Partitura library '+new Date().toISOString().slice(0,10)+'.zip');
     toast('Exported '+statsText(envStats(entries)));
@@ -1309,7 +1321,7 @@ async function importLibrary(file){
     data=JSON.parse(await jf.async('string'));
     if(!data||data.format!=='partitura-library')throw new Error('this is not a Partitura backup');
     if(!(data.version>=1))throw new Error('unreadable backup version');
-    if(data.version>2)throw new Error('the backup was made by a newer version of the app');
+    if(data.version>3)throw new Error('the backup was made by a newer version of the app');
     if(!Array.isArray(data.entries))throw new Error('the backup has no entries');
   }catch(err){banner('Could not import: '+((err&&err.message)||'invalid file'));return}
   const cleaned=data.entries.slice(0,2000).map(cleanEntry),valid=cleaned.filter(Boolean);
@@ -1593,26 +1605,76 @@ $('pgDup').onclick=()=>modifyPages('dup',cur);$('pgDel').onclick=()=>askDelete(c
    Position is stored as a fraction (0..1) of the current system, so changing BPM mid-playback
    changes the speed instantly and the line stays exactly where it is. */
 const tp={running:false,started:false,sys:0,frac:0,last:0,raf:0};
-let viewS=1,trkEl=null,taps=[],sysDrag=null,selSys=null,sysAct=null;
+let viewS=1,trkEl=null,taps=[],sysDrag=null,selSys=null,sysAct=null,boxMode=null,barAct=null;
 const T_COLORS=['#ffd600','#ff9800','#4caf50','#29b6f6','#ff4081'];
-const defTempo=()=>({bpm:100,beats:4,w:3,o:45,c:'#ffd600',lastM:4,pages:{}});
+const defTempo=()=>({bpm:100,beats:4,den:4,sound:false,countIn:0,w:3,o:45,c:'#ffd600',lastM:4,pages:{}});
 function tempo(create){
   if(!current)return null;
   if(!current.tempo){if(!create)return null;current.tempo=defTempo()}
   return current.tempo;
 }
 const sysOf=p=>{const T=current&&current.tempo;return(T&&T.pages&&T.pages[p])||[]};
-const sysDur=s=>{const T=tempo(true);return(60/T.bpm)*T.beats*s.m};
+/* Effective tempo of a box. A box's own BPM / time signature (when set) applies to it and to every later box, in score order
+   (page by page, top to bottom), until another box changes it. Skipped boxes still carry their tempo marks, like a printed score.
+   BPM = pulses per 60 s; a measure lasts `beats` pulses, so a box lasts (60 / bpm) x beats x measures seconds. */
+function effOf(s){
+  const T=tempo(true);
+  let bpm=T.bpm,beats=T.beats,den=T.den||4,sound=T.sound===true,sb=null,sbe=null,sd=null,ss=null;
+  for(const k of Object.keys(T.pages||{}).sort((a,b)=>a-b)){
+    for(const x of T.pages[k]){
+      if(x.bpm){bpm=x.bpm;sb=x}
+      if(x.beats){beats=x.beats;sbe=x}
+      if(x.den){den=x.den;sd=x}
+      if(typeof x.sound==='boolean'){sound=x.sound;ss=x}
+      if(x===s)return{bpm,beats,den,sound,bpmEnd:x.bpmEnd||null,srcBpm:sb,srcBeats:sbe,srcDen:sd,srcSound:ss};
+      if(x.bpmEnd){bpm=x.bpmEnd;sb=x}   // after a gradual change the following boxes carry on from its end tempo
+    }
+  }
+  return{bpm:T.bpm,beats:T.beats,den:T.den||4,sound:T.sound===true,bpmEnd:null,srcBpm:null,srcBeats:null,srcDen:null,srcSound:null};
+}
+/* Tempo maths of a box. A box holds N = beats x measures pulses. With one BPM they are evenly spaced. With a gradual tempo change
+   (accelerando / ritardando: the box has an end BPM) the BPM moves smoothly with the pulse count from b0 to b1, which has closed forms:
+   t(u) = ln(1 + u r) / k and u(t) = (e^(k t) - 1) / r, with r = (b1 - b0) / b0, k = (b1 - b0) / (60 N) and u = pulses / N. */
+function bmath(s,e){
+  e=e||effOf(s);const N=e.beats*s.m,b0=e.bpm,b1=(e.bpmEnd&&e.bpmEnd!==e.bpm)?e.bpmEnd:e.bpm;
+  if(b1===b0)return{N,b0,b1,ramp:false,T:60*N/b0};
+  const r=(b1-b0)/b0,k=(b1-b0)/(60*N);
+  return{N,b0,b1,ramp:true,r,k,T:Math.log(1+r)/k};
+}
+const tOfU=(M,u)=>M.ramp?Math.log(1+u*M.r)/M.k:u*M.T;
+const uOfT=(M,t)=>M.ramp?(Math.exp(M.k*t)-1)/M.r:t/M.T;
+/* x position of the line at pulse-fraction u. Without barlines it moves evenly across the box; with barlines every measure takes the
+   same time and the line follows the real measure widths. Barlines are stored relative to the box (0..1), so moving, resizing or
+   cropping the box never breaks them. */
+function xOf(s,u){
+  const b=s.bars;
+  if(!b||!b.length)return s.x0+(s.x1-s.x0)*u;
+  const m=b.length+1,q=Math.max(0,Math.min(1,u))*m,j=Math.min(m-1,Math.floor(q)),loc=q-j;
+  const a=j===0?0:b[j-1],c=j===m-1?1:b[j];
+  return s.x0+(s.x1-s.x0)*(a+(c-a)*loc);
+}
+const sysDur=s=>bmath(s).T;
+const DENS=[1,2,4,8,16,32];
+function hasTempoOverrides(t){return !!(t&&((t.den&&t.den!==4)||t.sound===true||t.countIn>0||Object.values(t.pages||{}).some(l=>l.some(s=>s.bpm||s.beats||s.den||s.bpmEnd||(s.bars&&s.bars.length)||typeof s.sound==='boolean'))))}
 function cleanTempo(t){
   if(!t||typeof t!=='object')return null;
-  const o={bpm:num(t.bpm,20,300,100),beats:Math.round(num(t.beats,1,16,4)),w:num(t.w,1,12,3),o:num(t.o,15,100,45),c:colOK(t.c)?t.c:'#ffd600',lastM:Math.round(num(t.lastM,1,64,4)),...(t.loop===false?{loop:false}:{}),pages:{}};
+  const o={bpm:num(t.bpm,20,300,100),beats:Math.round(num(t.beats,1,16,4)),den:DENS.includes(+t.den)?+t.den:4,w:num(t.w,1,12,3),o:num(t.o,15,100,45),c:colOK(t.c)?t.c:'#ffd600',lastM:Math.round(num(t.lastM,1,64,4)),...(t.loop===false?{loop:false}:{}),...(t.sound===true?{sound:true}:{}),...([1,2].includes(+t.countIn)?{countIn:+t.countIn}:{}),pages:{}};
   if(t.pages&&typeof t.pages==='object')for(const k of Object.keys(t.pages)){
     if(!/^\d{1,5}$/.test(k)||!Array.isArray(t.pages[k]))continue;
     const list=[];
     for(const s of t.pages[k].slice(0,40)){
       if(!s||typeof s!=='object')continue;
       const x0=num(s.x0,0,1),x1=num(s.x1,0,1),y0=num(s.y0,0,1),y1=num(s.y1,0,1);
-      if(x1-x0>.01&&y1-y0>.004)list.push({x0,x1,y0,y1,m:Math.round(num(s.m,1,64,4)),...(s.on===false?{on:false}:{})});
+      const bs=(Array.isArray(s.bars)?s.bars:[]).filter(b=>typeof b==='number'&&b>=.004&&b<=.996).sort((a,b)=>a-b).slice(0,63);
+      const bars=[];for(const b of bs)if(!bars.length||b-bars[bars.length-1]>=.004)bars.push(Math.round(b*10000)/10000);
+      if(x1-x0>.01&&y1-y0>.004)list.push({x0,x1,y0,y1,m:bars.length?bars.length+1:Math.round(num(s.m,1,64,4)),
+        ...(typeof s.bpm==='number'&&s.bpm>=20&&s.bpm<=300?{bpm:Math.round(s.bpm*10)/10}:{}),
+        ...(Number.isInteger(s.beats)&&s.beats>=1&&s.beats<=16?{beats:s.beats}:{}),
+        ...(DENS.includes(s.den)?{den:s.den}:{}),
+        ...(typeof s.sound==='boolean'?{sound:s.sound}:{}),
+        ...(bars.length?{bars}:{}),
+        ...(typeof s.bpmEnd==='number'&&s.bpmEnd>=20&&s.bpmEnd<=300?{bpmEnd:Math.round(s.bpmEnd*10)/10}:{}),
+        ...(s.on===false?{on:false}:{})});
     }
     if(list.length)o.pages[k]=list;
   }
@@ -1630,6 +1692,15 @@ function buildTempo(){
       tv.appendChild(svgEl('rect',{class:'tbx',x:s.x0*nw,y:s.y0*nh,width:(s.x1-s.x0)*nw,height:(s.y1-s.y0)*nh,fill:s.on===false?'#888':'#ffd600','fill-opacity':s.on===false?.14:(isSel?.2:(calib?.12:(panel?.06:.04))),stroke:isSel?'#e8794a':(s.on===false?'#777':'#d9a400'),'stroke-opacity':(calib||panel||isSel)?1:.5,'stroke-width':(isSel?2.5:1.5)*S,'stroke-dasharray':isSel?'none':(6*S)+' '+(4*S)}));
       const t=svgEl('text',{class:'tbx',x:s.x0*nw+4*S,y:s.y0*nh+14*S,'font-size':13*S,'font-family':'system-ui,sans-serif','font-weight':'700',fill:'#8a6a00'});t.textContent=String(i+1);if(calib||panel)tv.appendChild(t);
     });
+    if(calib||panel)sy.forEach(s=>{
+      if(!s.bars||!s.bars.length)return;
+      const act=!!(boxMode&&boxMode.k==='bars'&&boxMode.s===s);
+      for(const b of s.bars){
+        const x=(s.x0+b*(s.x1-s.x0))*nw;
+        tv.appendChild(svgEl('line',{class:'tbx','pointer-events':'none',x1:x,x2:x,y1:s.y0*nh,y2:s.y1*nh,stroke:'#b8860b','stroke-width':(act?2.5:1.5)*S,'stroke-dasharray':(5*S)+' '+(4*S)}));
+        if(act)tv.appendChild(svgEl('circle',{class:'tbx','pointer-events':'none',cx:x,cy:s.y0*nh,r:7*S,fill:'#e8794a',stroke:'#fff','stroke-width':1.5*S}));
+      }
+    });
     if(sysDrag){
       const a=Math.min(sysDrag.x0,sysDrag.x1),b=Math.max(sysDrag.x0,sysDrag.x1),c=Math.min(sysDrag.y0,sysDrag.y1),d=Math.max(sysDrag.y0,sysDrag.y1);
       tv.appendChild(svgEl('rect',{x:a*nw,y:c*nh,width:(b-a)*nw,height:(d-c)*nh,fill:'#e8794a','fill-opacity':.15,stroke:'#e8794a','stroke-width':2*S}));
@@ -1646,7 +1717,7 @@ function moveTracker(){
   if(!trkEl||!pages[cur])return;
   const sy=sysOf(cur),s=sy[Math.min(tp.sys,sy.length-1)];if(!s)return;
   const nw=pages[cur].el.width,nh=pages[cur].el.height,T=tempo(),wpx=(T?T.w:3)/(viewS||1);
-  trkEl.setAttribute('x',(s.x0+(s.x1-s.x0)*tp.frac)*nw-wpx/2);
+  trkEl.setAttribute('x',xOf(s,tp.frac)*nw-wpx/2);
   trkEl.setAttribute('y',s.y0*nh);trkEl.setAttribute('width',wpx);trkEl.setAttribute('height',(s.y1-s.y0)*nh);
 }
 function tpUI(){
@@ -1659,11 +1730,81 @@ function tpUI(){
     q.querySelector('.ic').textContent=tp.running?'❚❚':'▶';q.querySelector('.lbl').textContent=tp.running?' Pause':' Play';
   }
 }
-function frame(ts){
+/* ---------- metronome: clicks on the audio clock ----------
+   When any metronome sound is wanted, the audio clock is the master clock for BOTH the clicks and the yellow line, so they can
+   never drift apart. Clicks are scheduled a little ahead of time (a 0.2 s look-ahead) from the same timeline the line follows:
+   every box lasts (60 / BPM) x beats x measures seconds and holds beats x measures pulses; the first pulse of each measure is accented. */
+const MET={nodes:[],last:-1,sounded:-1};let metMute=false;
+let mvol=(()=>{const v=parseFloat(lsGet('mvol','70'));return isFinite(v)?Math.max(0,Math.min(100,v)):70})();
+let mlat=(()=>{const v=parseFloat(lsGet('mlat','0'));return isFinite(v)?Math.max(0,Math.min(300,v)):0})();
+function soundWanted(){const T=current&&current.tempo;return !!(T&&(T.sound===true||Object.values(T.pages||{}).some(l=>l.some(s=>s.sound===true))))}
+function tpClock(){
+  if(soundWanted()){const a=audioCtx();if(a&&a.state==='running')return{c:'a',t:a.currentTime}}
+  return{c:'p',t:performance.now()/1000};
+}
+function peekNext(page,sysIdx){
+  const T=tempo();if(!T)return null;
+  const sy=T.pages[page]||[],nx=firstOn(sy,sysIdx+1);
+  if(nx>=0)return{page,sys:nx};
+  if(T.loop===false){const f=firstOn(sy,0);return f>=0?{page,sys:f}:null}
+  for(let p=page+1;p<pages.length;p++){const ny=T.pages[p]||[],f=firstOn(ny,0);if(f>=0)return{page:p,sys:f};if(!ny.length)return null}
+  return null;
+}
+function metClick(t,accent){
+  const a=actx;if(!a||mvol<=0)return;
+  const o=a.createOscillator(),g=a.createGain();
+  const peak=Math.max(0.0001,Math.pow(mvol/100,2)*(accent?0.8:0.55));
+  o.type='triangle';o.frequency.value=accent?1500:1000;
+  g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(peak,t+0.002);g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+  o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+0.06);
+  MET.nodes.push({o,t});if(MET.nodes.length>64)MET.nodes.shift();
+}
+/* The timeline changed (pause, jump, tempo edit...): cancel clicks that have not sounded yet and remember the last one that did,
+   so a pulse is never played twice. hard = a deliberate jump, which forgets it so the new downbeat always sounds.
+   metResync also schedules the new clicks at once instead of waiting for the next animation frame. */
+function metSync(hard){
+  const a=actx;let s=hard?-1:MET.sounded;
+  if(a){const now=a.currentTime;for(const n of MET.nodes){if(n.t>now){try{n.o.stop()}catch(e){}}else if(!hard)s=Math.max(s,n.t)}}
+  MET.nodes=[];MET.sounded=s;MET.last=s;
+}
+function metResync(hard){metSync(hard);if(tp.running&&actx&&!metMute){const k=tpClock();if(k.c==='a')metTick(k)}}
+function metToggleMute(){metMute=!metMute;metResync();toast(metMute?'Metronome muted':'Metronome sound back on')}
+function metTick(k){
+  if(k.c!=='a'||!tp.running||metMute)return;
+  const lat=mlat/1000;const a=actx,now=a.currentTime,horizon=now+0.2+lat;
+  let page=cur,sysIdx=tp.sys,s=sysOf(page)[sysIdx];if(!s)return;
+  const segs=[];let start;
+  if(tp.pre){const p=tp.pre;if(p.total>0)segs.push({start:p.start,M:{ramp:false,T:p.total*p.pd},N:p.total,beats:p.beats,snd:true,noShift:true});start=p.end}
+  else{start=tp.last-tOfU(bmath(s),tp.frac)}   // tp.frac is the position at audio time tp.last (the last update), not at "now"
+  for(let g=0;g<12&&s;g++){
+    const e=effOf(s),M=bmath(s,e);
+    segs.push({start,M,N:M.N,beats:e.beats,snd:e.sound});
+    const end=start+M.T;if(end-lat>horizon)break;
+    const nx=peekNext(page,sysIdx);if(!nx)break;
+    page=nx.page;sysIdx=nx.sys;s=sysOf(page)[sysIdx];start=end;
+  }
+  for(const sg of segs){
+    if(!sg.snd)continue;
+    const sh=sg.noShift?0:lat,pdMin=sg.M.ramp?60/Math.max(sg.M.b0,sg.M.b1):sg.M.T/sg.N;
+    const from=Math.max(now-0.03,MET.last+pdMin*0.25)+sh-sg.start;   // earliest click, on the line's own timeline
+    let i=from<=0?0:Math.max(0,Math.ceil(sg.N*uOfT(sg.M,Math.min(from,sg.M.T))-1e-9));
+    for(;;i++){
+      const tl=sg.start+tOfU(sg.M,i/sg.N),t=tl-sh;   // clicks sound a little before the line when a latency offset is set
+      if(i>=sg.N||t>horizon)break;
+      if(t>=now-0.03&&t>MET.last+pdMin*0.25){metClick(t,i%sg.beats===0);MET.last=t}
+    }
+  }
+}
+function frame(){
   if(!tp.running)return;
-  const dt=Math.min(.25,Math.max(0,(ts-tp.last)/1000));tp.last=ts;
+  const k=tpClock();
+  if(tp.clk!==k.c){tp.clk=k.c;tp.last=k.t;metSync()}
+  if(tp.pre&&k.t<tp.pre.end){tp.last=k.t;metTick(k);tp.raf=requestAnimationFrame(frame);return}
+  let dt=Math.min(.25,Math.max(0,k.t-tp.last));
+  if(tp.pre){dt=Math.min(.25,Math.max(0,k.t-tp.pre.end));tp.pre=null}
+  tp.last=k.t;
   advance(dt);
-  if(tp.running){moveTracker();tp.raf=requestAnimationFrame(frame)}
+  if(tp.running){moveTracker();metTick(k);tp.raf=requestAnimationFrame(frame)}
 }
 function advance(dt){
   let rem=dt,guard=0;
@@ -1671,9 +1812,9 @@ function advance(dt){
     const sy=sysOf(cur),s=sy[tp.sys];
     if(!s){tempoPause();toast('No systems on this page');return}
     if(s.on===false){tp.frac=0;if(!nextSystem())return;continue}
-    const dur=sysDur(s),need=(1-tp.frac)*dur;
-    if(rem<need){tp.frac+=rem/dur;rem=0}
-    else{rem-=need;tp.frac=0;if(!nextSystem())return}
+    const M=bmath(s),t0=tOfU(M,tp.frac),left=M.T-t0;
+    if(rem<left){tp.frac=uOfT(M,t0+rem);rem=0}
+    else{rem-=left;tp.frac=0;if(!nextSystem())return}
   }
 }
 const firstOn=(sy,from)=>{for(let i=from||0;i<sy.length;i++)if(sy[i].on!==false)return i;return -1};
@@ -1705,14 +1846,25 @@ function tempoStart(){
   if(firstOn(sy,0)<0){toast('Every box on this page is switched off');return}
   if(tp.sys>=sy.length||(tp.sys===sy.length-1&&tp.frac>=1)){tp.sys=0;tp.frac=0}
   if(sy[tp.sys]&&sy[tp.sys].on===false){const f=firstOn(sy,tp.sys);tp.sys=f>=0?f:firstOn(sy,0);tp.frac=0}
-  tp.running=true;tp.started=true;tp.last=performance.now();tp.raf=requestAnimationFrame(frame);
+  metSync(true);
+  tp.running=true;tp.started=true;{const k=tpClock();tp.clk=k.c;tp.last=k.t;
+    const T=tempo(),s0=sy[tp.sys];
+    const lat=mlat/1000,ci=(T&&T.countIn>0&&tp.frac===0)?T.countIn:0;
+    if(k.c==='a'&&s0&&(ci>0||lat>0)){
+      const e=effOf(s0),pd=60/e.bpm,st=actx.currentTime+(ci>0?0.05:0),total=e.beats*ci;
+      tp.pre={start:st,pd,beats:e.beats,total,end:st+total*pd+lat};if(ci>0)toast('Count-in…');
+    }
+    else tp.pre=null;
+    if(soundWanted()&&k.c!=='a')setTimeout(()=>{if(tp.running&&tp.clk!=='a')toast('Sound is blocked by the browser until you touch the screen once')},400)}
+  tp.raf=requestAnimationFrame(frame);
+  if(tp.clk==='a')metTick({c:'a',t:actx.currentTime});
   tpUI();buildTempo();
 }
-function tempoPause(){tp.running=false;cancelAnimationFrame(tp.raf);tpUI()}
+function tempoPause(){tp.running=false;cancelAnimationFrame(tp.raf);tp.pre=null;metSync();tpUI()}
 function tempoToggle(){tp.running?tempoPause():tempoStart()}
 function tempoReset(){tempoPause();tp.sys=Math.max(0,firstOn(sysOf(cur),0));tp.frac=0;tp.started=sysOf(cur).length>0;buildTempo();toast('Tempo line back at System 1')}
 function tempoHalt(){
-  tp.running=false;cancelAnimationFrame(tp.raf);tp.started=false;tp.sys=0;tp.frac=0;taps=[];sysDrag=null;
+  tp.running=false;cancelAnimationFrame(tp.raf);tp.pre=null;metSync();tp.started=false;tp.sys=0;tp.frac=0;taps=[];sysDrag=null;
   document.body.classList.remove('calib');
   const pn=$('tempobar');if(pn)pn.classList.remove('open');
   zoom=1;zoomUI();
@@ -1720,12 +1872,14 @@ function tempoHalt(){
 }
 function tempoOnShow(was){
   selSys=null;sysAct=null;
-  if(cur!==was){tp.sys=Math.max(0,firstOn(sysOf(cur),0));tp.frac=0}
+  if(cur!==was){tp.sys=Math.max(0,firstOn(sysOf(cur),0));tp.frac=0;metResync()}
   syncLoop();buildTempo();renderSysList();
 }
 function setBpm(v){
   const T=tempo(true);if(!T)return;
-  T.bpm=Math.max(20,Math.min(300,Math.round(v*10)/10));$('tBpm').value=T.bpm;saveMeta();
+  const val=Math.max(20,Math.min(300,Math.round(v*10)/10)),cs=sysOf(cur)[tp.sys],e=cs?effOf(cs):null;
+  (e&&e.srcBpm?e.srcBpm:T).bpm=val;   // tap tempo changes the tempo section that is playing: the box that defines it, or the default
+  $('tBpm').value=T.bpm;saveMeta();updateSysRows();
 }
 function tapTempo(){
   const now=performance.now();
@@ -1733,7 +1887,7 @@ function tapTempo(){
   taps.push(now);if(taps.length>8)taps.shift();
   if(taps.length<2){toast('Tap again to set the tempo');return}
   let sum=0;for(let i=1;i<taps.length;i++)sum+=taps[i]-taps[i-1];
-  setBpm(60000/(sum/(taps.length-1)));toast('Tempo: '+tempo().bpm+' BPM');
+  setBpm(60000/(sum/(taps.length-1)));const cs=sysOf(cur)[tp.sys];toast('Tempo: '+(cs?effOf(cs).bpm:tempo().bpm)+' BPM');
 }
 /* --- tempo box selection, move and resize (calibrate mode, or the 🎯 Boxes tool in edit mode) ---
    A box is stored as page fractions x0,x1,y0,y1. Its sweep time comes only from BPM x beats x measures, and the line
@@ -1747,7 +1901,7 @@ function hitSys(p){
 }
 function drawTempoHandles(ov,nw,nh){
   const calibOn=document.body.classList.contains('calib'),tb=tool==='tbox'&&document.body.classList.contains('edit');
-  if(!selSys||!(calibOn||tb))return;
+  if(!selSys||!(calibOn||tb)||boxMode)return;   // no resize handles while placing barlines or splitting: the whole box can be tapped
   if(sysOf(cur).indexOf(selSys)<0){selSys=null;return}
   const s=selSys,hs=(matchMedia('(pointer:coarse)').matches?30:20)/(viewS||1),xm=(s.x0+s.x1)/2,ym=(s.y0+s.y1)/2;
   const pts={nw:[s.x0,s.y0],n:[xm,s.y0],ne:[s.x1,s.y0],e:[s.x1,ym],se:[s.x1,s.y1],s:[xm,s.y1],sw:[s.x0,s.y1],w:[s.x0,ym]};
@@ -1776,7 +1930,9 @@ function bindCalib(ov){
   ov.onpointerdown=e=>{
     const calibOn=document.body.classList.contains('calib'),tb=tool==='tbox'&&document.body.classList.contains('edit');
     if(calibOn||tb){
-      const p=ptr(e),hit=hitSys(p);
+      const p=ptr(e);
+      if(boxMode){if(barPointerDown(e,p,ov))return;boxMode=null;updateSysRows()}
+      const hit=hitSys(p);
       if(hit){
         selSys=hit;sysAct={k:'move',s:hit,sx:p.x,sy:p.y,orig:{x0:hit.x0,x1:hit.x1,y0:hit.y0,y1:hit.y1},moved:false};
         ov.setPointerCapture(e.pointerId);buildTempo();renderMarks();return;
@@ -1788,6 +1944,7 @@ function bindCalib(ov){
     return d0&&d0.call(ov,e);
   };
   ov.onpointermove=e=>{
+    if(barAct){barMove(ptr(e));return}
     if(sysAct){
       const p=ptr(e),a=sysAct,s=a.s,o=a.orig;a.moved=true;
       if(a.k==='move'){
@@ -1806,6 +1963,7 @@ function bindCalib(ov){
     return m0&&m0.call(ov,e);
   };
   ov.onpointerup=ov.onpointercancel=e=>{
+    if(barAct){barUp();return}
     if(sysAct){
       const a=sysAct;sysAct=null;
       if(a.moved){
@@ -1832,14 +1990,113 @@ function addSystem(d){
 function setCalib(on){
   if(on&&!pages.length)return;
   if(on)setEdit(false);
-  document.body.classList.toggle('calib',on);sysDrag=null;selSys=null;sysAct=null;
+  document.body.classList.toggle('calib',on);sysDrag=null;selSys=null;sysAct=null;boxMode=null;barAct=null;
   const b=$('tCal');if(b){b.classList.toggle('primary',on);b.textContent=on?'✔ Done':'✎ Calibrate'}
   if(on){tempoPause();toast('Drag a box around each staff row, top to bottom')}
   buildTempo();
   if(!zActive())resetZoom();
 }
+/* ---------- barlines, splitting a box, previous tempo box ---------- */
+/* after a jump while sound is on, the line waits for the latency offset so the (earlier) click and the line meet */
+function metHold(){const lat=mlat/1000;if(tp.running&&lat>0&&tp.clk==='a'&&actx){const t=actx.currentTime;tp.pre={start:t,pd:1,beats:4,total:0,end:t+lat}}}
+function tempoPrevBox(){
+  if(!current||!pages.length)return;
+  const sy=sysOf(cur);let i=tp.sys-1;while(i>=0&&sy[i].on===false)i--;
+  if(i>=0)tp.sys=i;
+  else{
+    let p=cur-1,f=-1;
+    while(p>=0){const l=sysOf(p);for(let j=l.length-1;j>=0;j--)if(l[j].on!==false){f=j;break}if(f>=0)break;p--}
+    if(p<0||f<0){toast('This is the first tempo box');return}
+    if(!show(p))return;tp.sys=f;
+  }
+  tp.frac=0;tp.started=true;if(tp.running){const k=tpClock();tp.clk=k.c;tp.last=k.t}
+  buildTempo();moveTracker();metHold();metResync(true);
+}
+function startBoxMode(kind,s){
+  if(boxMode&&boxMode.k===kind&&boxMode.s===s){boxMode=null;buildTempo();updateSysRows();return}
+  if(!document.body.classList.contains('calib'))setCalib(true);
+  selSys=s;boxMode={k:kind,s};buildTempo();renderMarks();updateSysRows();
+  toast(kind==='bars'?'Tap inside the box to add a barline, drag one to move it, tap one to remove it':'Tap inside the box where it should be split');
+}
+function evenBars(s){
+  if(s.m<2){toast('Set 2 or more measures first (+ button)');return}
+  s.bars=Array.from({length:s.m-1},(_,k)=>Math.round((k+1)/s.m*10000)/10000);
+  saveMeta();buildTempo();updateSysRows();toast('Barlines placed evenly. Use ┃ Edit barlines to drag them onto the real barlines.');
+}
+function clearBars(s){delete s.bars;saveMeta();buildTempo();updateSysRows();toast('Barlines removed')}
+function splitBox(s,rel){
+  const T=tempo(true),l=T&&T.pages[cur],i=l?l.indexOf(s):-1;if(i<0)return;
+  const w=s.x1-s.x0;let leftM,bl=null,br=null;
+  if(s.bars&&s.bars.length){
+    let k=0,bd=9;s.bars.forEach((b,j)=>{const d=Math.abs(b-rel);if(d<bd){bd=d;k=j}});
+    rel=s.bars[k];leftM=k+1;
+    bl=s.bars.slice(0,k).map(b=>b/rel);br=s.bars.slice(k+1).map(b=>(b-rel)/(1-rel));
+  }else{
+    if(s.m<2){toast('A box needs at least 2 measures to be split');return}
+    leftM=Math.max(1,Math.min(s.m-1,Math.round(s.m*rel)));
+  }
+  if(w*rel<.04||w*(1-rel)<.04){toast('Too close to the edge to split');return}
+  const xs=s.x0+w*rel,right={x0:xs,x1:s.x1,y0:s.y0,y1:s.y1,m:s.m-leftM};
+  if(s.on===false)right.on=false;if(br&&br.length)right.bars=br;
+  s.x1=xs;s.m=leftM;if(bl&&bl.length)s.bars=bl;else delete s.bars;
+  l.splice(i+1,0,right);if(tp.sys>i)tp.sys++;
+  boxMode=null;selSys=right;saveMeta();buildTempo();renderMarks();renderSysList();
+  toast('Split into boxes '+(i+1)+' and '+(i+2)+'. Give box '+(i+2)+' its own BPM for a tempo change there.');
+}
+function barPointerDown(e,p,ov){
+  const s=boxMode.s;if(sysOf(cur).indexOf(s)<0){boxMode=null;return false}
+  if(!(p.x>=s.x0-.01&&p.x<=s.x1+.01&&p.y>=s.y0-.01&&p.y<=s.y1+.01))return false;
+  const w=s.x1-s.x0,rel=Math.max(.004,Math.min(.996,(p.x-s.x0)/w));
+  if(boxMode.k==='split'){splitBox(s,rel);return true}
+  const nw=pages[cur].el.width,tolPage=18/(viewS||1)/nw,bars=s.bars||[];
+  let hit=-1,bd=9;bars.forEach((b,i)=>{const d=Math.abs(s.x0+b*w-p.x);if(d<bd){bd=d;hit=i}});
+  if(hit>=0&&bd<=tolPage)barAct={s,i:hit,moved:false,startRel:bars[hit]};
+  else{
+    const gap=.008;
+    if(rel<gap||rel>1-gap||bars.some(b=>Math.abs(b-rel)<gap)){toast('Too close to the edge or to another barline');return true}
+    const nb=bars.concat(rel).sort((a,b)=>a-b);s.bars=nb;s.m=nb.length+1;
+    barAct={s,i:nb.indexOf(rel),moved:true,startRel:rel};
+  }
+  ov.setPointerCapture(e.pointerId);buildTempo();updateSysRows();return true;
+}
+function barMove(p){
+  const a=barAct,s=a.s,w=s.x1-s.x0;let rel=(p.x-s.x0)/w;
+  const lo=a.i>0?s.bars[a.i-1]+.008:.008,hi=a.i<s.bars.length-1?s.bars[a.i+1]-.008:.992;
+  rel=Math.max(lo,Math.min(hi,rel));
+  if(Math.abs(rel-a.startRel)*w*pages[cur].el.width*(viewS||1)>6)a.moved=true;
+  if(a.moved)s.bars[a.i]=rel;
+  buildTempo();
+}
+function barUp(){
+  const a=barAct;barAct=null;
+  if(!a.moved){a.s.bars.splice(a.i,1);if(!a.s.bars.length)delete a.s.bars;a.s.m=a.s.bars?a.s.bars.length+1:1}
+  saveMeta();buildTempo();renderSysList();
+}
+let sysRows=[];
+function locateBox(x){const T=tempo(true);for(const k of Object.keys(T.pages||{}).sort((a,b)=>a-b)){const i=T.pages[k].indexOf(x);if(i>=0)return{p:+k,i}}return null}
+function updateSysRows(){
+  metResync();
+  const from=src=>{if(!src)return 'the default';const L=locateBox(src);return L?'page '+(L.p+1)+' · System '+(L.i+1):'an earlier box'};
+  for(const r of sysRows){
+    const s=r.s,e=effOf(s),d=sysDur(s);
+    r.lab.textContent='System '+(r.i+1)+' · '+e.beats+'/'+e.den+' · '+e.bpm+(e.bpmEnd&&e.bpmEnd!==e.bpm?'→'+e.bpmEnd:'')+' BPM'+(e.sound?' 🔊':'')+' · '+s.m+' measure'+(s.m===1?'':'s')+' · '+d.toFixed(1)+' s · '+((s.x1-s.x0)*100/d).toFixed(1)+'%/s'+(s.on===false?' · skipped':'');
+    r.bpm.placeholder=String(e.bpm);r.num.placeholder=String(e.beats);
+    const parts=[];
+    if(!s.bpm)parts.push('BPM from '+from(e.srcBpm));
+    if(!s.beats&&!s.den)parts.push('time signature from '+from(e.srcBeats||e.srcDen));
+    if(typeof s.sound!=='boolean')parts.push('sound '+(e.sound?'on':'off')+' from '+from(e.srcSound));
+    const own=!!(s.bpm||s.beats||s.den||s.bpmEnd||typeof s.sound==='boolean');
+    r.hint.textContent=(own?'◆ tempo change here. ':'')+(parts.length?'↳ '+parts.join(' · '):'');
+    r.box.classList.toggle('chg',own);
+    const nb=s.bars?s.bars.length:0;
+    r.bh.textContent=nb?'┃ '+(nb+1)+' measures follow '+nb+' barline'+(nb===1?'':'s'):'no barlines: the line moves at a steady speed';
+    r.bBars.classList.toggle('primary',!!(boxMode&&boxMode.k==='bars'&&boxMode.s===s));
+    r.bSplit.classList.toggle('primary',!!(boxMode&&boxMode.k==='split'&&boxMode.s===s));
+    r.bClr.style.display=nb?'':'none';
+  }
+}
 function renderSysList(){
-  const box=$('sysList');if(!box)return;box.replaceChildren();
+  const box=$('sysList');if(!box)return;box.replaceChildren();sysRows=[];
   if(!current||!pages.length)return;
   const sy=sysOf(cur);
   if(!sy.length){
@@ -1848,14 +2105,42 @@ function renderSysList(){
     box.appendChild(d);return;
   }
   const mk=(t,fn,title)=>{const b=document.createElement('button');b.textContent=t;b.onclick=fn;if(title){b.title=title;b.setAttribute('aria-label',title)}return b};
+  const txt=t=>{const n=document.createElement('span');n.textContent=t;return n};
   sy.forEach((s,i)=>{
+    const wrap=document.createElement('div');wrap.className='sbox';
     const row=document.createElement('div');row.className='srow2';
-    const lab=document.createElement('span');lab.textContent='System '+(i+1)+' · '+s.m+' measure'+(s.m===1?'':'s')+' · '+sysDur(s).toFixed(1)+' s · '+((s.x1-s.x0)*100/sysDur(s)).toFixed(1)+'%/s'+(s.on===false?' · skipped':'');
-    const chg=n=>{s.m=Math.max(1,Math.min(64,s.m+n));const T=tempo(true);T.lastM=s.m;saveMeta();renderSysList()};
+    const lab=document.createElement('span');
+    const chg=n=>{if(s.bars&&s.bars.length){toast('This box counts its measures from its barlines. Edit or remove the barlines to change the count.');return}s.m=Math.max(1,Math.min(64,s.m+n));const T=tempo(true);T.lastM=s.m;saveMeta();updateSysRows()};
     row.append(lab,mk('−',()=>chg(-1),'Fewer measures'),mk('+',()=>chg(1),'More measures'),
       mk('🗑',()=>{const T=tempo(true);if(selSys===T.pages[cur][i])selSys=null;T.pages[cur].splice(i,1);if(tp.sys>=T.pages[cur].length){tp.sys=0;tp.frac=0}saveMeta();buildTempo();renderSysList()},'Delete system'));
-    box.appendChild(row);
+    const r3=document.createElement('div');r3.className='srow3';
+    const bpm=document.createElement('input');bpm.type='number';bpm.min=20;bpm.max=300;bpm.step='0.1';bpm.inputMode='decimal';bpm.value=s.bpm||'';bpm.setAttribute('aria-label','BPM for system '+(i+1)+' (empty = same as before)');
+    const num=document.createElement('input');num.type='number';num.min=1;num.max=16;num.step=1;num.inputMode='numeric';num.value=s.beats||'';num.setAttribute('aria-label','Beats per measure for system '+(i+1)+' (empty = same as before)');
+    const be=document.createElement('input');be.type='number';be.min=20;be.max=300;be.step='0.1';be.inputMode='decimal';be.value=s.bpmEnd||'';be.placeholder='steady';be.setAttribute('aria-label','Ending BPM for a gradual tempo change in system '+(i+1)+' (empty = steady tempo)');
+    be.oninput=()=>{const t=be.value.trim();if(t===''){delete s.bpmEnd}else{const v=parseFloat(t);if(!isFinite(v)||v<20||v>300)return;s.bpmEnd=Math.round(v*10)/10}saveMeta();updateSysRows()};
+    const den=document.createElement('select');den.setAttribute('aria-label','Note value of the time signature for system '+(i+1));
+    for(const v of ['','1','2','4','8','16','32']){const o=document.createElement('option');o.value=v;o.textContent=v||'↳';den.appendChild(o)}
+    den.value=s.den?String(s.den):'';
+    const snd=document.createElement('select');snd.setAttribute('aria-label','Metronome sound for system '+(i+1));
+    for(const [v,t] of [['','↳ same'],['on','🔊 on'],['off','🔇 off']]){const o=document.createElement('option');o.value=v;o.textContent=t;snd.appendChild(o)}
+    snd.value=typeof s.sound==='boolean'?(s.sound?'on':'off'):'';
+    snd.onchange=()=>{if(snd.value==='')delete s.sound;else s.sound=snd.value==='on';saveMeta();updateSysRows()};
+    const hint=document.createElement('span');hint.className='hint';hint.style.margin='0';
+    bpm.oninput=()=>{const t=bpm.value.trim();if(t===''){delete s.bpm}else{const v=parseFloat(t);if(!isFinite(v)||v<20||v>300)return;s.bpm=Math.round(v*10)/10}saveMeta();updateSysRows()};
+    num.oninput=()=>{const t=num.value.trim();if(t===''){delete s.beats}else{const v=parseInt(t,10);if(!(v>=1&&v<=16))return;s.beats=v}saveMeta();updateSysRows()};
+    den.onchange=()=>{if(den.value==='')delete s.den;else s.den=+den.value;saveMeta();updateSysRows()};
+    r3.append(txt('BPM'),bpm,txt('→'),be,txt('Time'),num,txt('/'),den,txt('Sound'),snd,hint);
+    const r4=document.createElement('div');r4.className='srow3';
+    const bBars=mk('┃ Edit barlines',()=>startBoxMode('bars',s),'Place barlines inside this box so the line follows the real measures');
+    const bEven=mk('═ Even',()=>evenBars(s),'Place one barline per measure, evenly spaced');
+    const bClr=mk('✕ Barlines',()=>clearBars(s),'Remove the barlines of this box');
+    const bSplit=mk('✂ Split',()=>startBoxMode('split',s),'Split this box in two to change the tempo partway along a staff row');
+    const bh=document.createElement('span');bh.className='hint';bh.style.margin='0';
+    r4.append(bBars,bEven,bClr,bSplit,bh);
+    wrap.append(row,r3,r4);box.appendChild(wrap);
+    sysRows.push({s,i,box:wrap,lab,bpm,num,hint,bBars,bSplit,bClr,bh});
   });
+  updateSysRows();
 }
 /* per-box 'Fit' checkbox (left of each tempo box) and page-loop checkbox */
 function toggleSys(i,on){
@@ -1898,12 +2183,15 @@ $('loopCb').onchange=e=>{
 };
 function syncTempoUI(){
   const T=tempo()||defTempo();
-  $('tBpm').value=T.bpm;$('tBeats').value=T.beats;$('tW').value=T.w;$('tO').value=T.o;
+  $('tBpm').value=T.bpm;$('tBeats').value=T.beats;$('tDen').value=String(T.den||4);$('tSound').checked=T.sound===true;$('tCount').value=String(T.countIn||0);$('tW').value=T.w;$('tO').value=T.o;
   for(const b of document.querySelectorAll('#tColors .sw'))b.classList.toggle('on',b.dataset.c===T.c);
   tpUI();renderSysList();
 }
-$('tBpm').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v)&&v>=20&&v<=300){const T=tempo(true);if(T){T.bpm=v;saveMeta()}}};
-$('tBeats').oninput=e=>{const v=parseInt(e.target.value,10);if(v>=1&&v<=16){const T=tempo(true);if(T){T.beats=v;saveMeta()}}};
+$('tBpm').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v)&&v>=20&&v<=300){const T=tempo(true);if(T){T.bpm=v;saveMeta();updateSysRows()}}};
+$('tBeats').oninput=e=>{const v=parseInt(e.target.value,10);if(v>=1&&v<=16){const T=tempo(true);if(T){T.beats=v;saveMeta();updateSysRows()}}};
+$('tDen').onchange=e=>{const T=tempo(true);if(T){T.den=+e.target.value;saveMeta();updateSysRows()}};
+$('tSound').onchange=e=>{const T=tempo(true);if(T){T.sound=e.target.checked;saveMeta();updateSysRows();if(T.sound)audioCtx()}};
+$('tCount').onchange=e=>{const T=tempo(true);if(T){T.countIn=+e.target.value;saveMeta()}};
 $('tW').oninput=e=>{const T=tempo(true);if(T){T.w=+e.target.value;saveMeta();moveTracker()}};
 $('tO').oninput=e=>{const T=tempo(true);if(T){T.o=+e.target.value;saveMeta();buildTempo()}};
 for(const c of T_COLORS){
@@ -1964,14 +2252,14 @@ syncActive();
 function tempoNextBox(){
   if(!current||!pages.length)return;
   if(!sysOf(cur).length){toast('No tempo boxes on this page');return}
-  tp.started=true;tp.frac=0;if(tp.running)tp.last=performance.now();
-  nextSystem();buildTempo();moveTracker();
+  tp.started=true;tp.frac=0;if(tp.running){const k=tpClock();tp.clk=k.c;tp.last=k.t}
+  nextSystem();buildTempo();moveTracker();metHold();metResync(true);
 }
 function tempoRestartLoop(){
   if(!current||!pages.length)return;
   const sy=sysOf(cur);if(!sy.length){toast('No tempo boxes on this page');return}
-  tp.sys=Math.max(0,firstOn(sy,0));tp.frac=0;tp.started=true;if(tp.running)tp.last=performance.now();
-  buildTempo();moveTracker();toast('Loop restarted at System 1');
+  tp.sys=Math.max(0,firstOn(sy,0));tp.frac=0;tp.started=true;if(tp.running){const k=tpClock();tp.clk=k.c;tp.last=k.t}
+  buildTempo();moveTracker();metHold();metResync(true);toast('Loop restarted at System 1');
 }
 const PEDAL_ACTIONS={
   smartNext:{pedal:'Pedal 1',label:'Next page, or next tempo box while the tempo line is playing',run:()=>{pedalCfg.smart&&tp.running?tempoNextBox():next()}},
@@ -1981,18 +2269,20 @@ const PEDAL_ACTIONS={
   firstPage:{label:'Go to page 1',run:()=>{turn(0)}},
   lastPage:{label:'Go to the last page',run:()=>{turn(pages.length-1)}},
   nextTempo:{label:'Next tempo box',run:()=>tempoNextBox()},
+  prevTempo:{label:'Previous tempo box',run:()=>tempoPrevBox()},
   restartLoop:{label:'Restart loop (back to System 1)',run:()=>tempoRestartLoop()},
   playPause:{label:'Play / Pause the tempo line',run:()=>tempoToggle()},
   resetTempo:{label:'Reset the tempo line (pause at System 1)',run:()=>tempoReset()},
   tapTempo:{label:'Tap tempo',run:()=>tapTempo()},
   toggleTempos:{label:'Show / hide tempo boxes (Fit mode)',run:()=>{tvHide=!tvHide;lsSet('tvis',tvHide?'0':'1');tvUI();toast(tvHide?'Tempo boxes hidden':'Tempo boxes shown')}},
   toggleFit:{label:'Fit mode on / off',run:()=>setFocus(!document.body.classList.contains('focus'))},
-  toggleMic:{label:'Voice commands on / off',run:()=>{wantOn?stopVoice():startVoice()}}
+  toggleMic:{label:'Voice commands on / off',run:()=>{wantOn?stopVoice():startVoice()}},
+  metMute:{label:'Metronome mute / unmute (this session)',run:()=>metToggleMute()}
 };
 const PEDAL_DEFAULTS={
   smartNext:['k:ArrowRight','k:PageDown','k:Space','k:Enter'],smartPrev:['k:ArrowLeft','k:PageUp','k:Backspace'],
-  nextPage:[],prevPage:[],firstPage:['k:Home'],lastPage:['k:End'],nextTempo:[],restartLoop:[],
-  playPause:['k:KeyP'],resetTempo:['k:KeyR'],tapTempo:['k:KeyT'],toggleTempos:[],toggleFit:[],toggleMic:[]
+  nextPage:[],prevPage:[],firstPage:['k:Home'],lastPage:['k:End'],nextTempo:[],prevTempo:[],restartLoop:[],
+  playPause:['k:KeyP'],resetTempo:['k:KeyR'],tapTempo:['k:KeyT'],toggleTempos:[],toggleFit:[],toggleMic:[],metMute:[]
 };
 const SIG_OK=/^(k:[A-Za-z0-9]{1,30}|m:[ncp]:\d{1,2}:\d{1,3})$/;
 function loadPedalCfg(){
@@ -2191,11 +2481,15 @@ unlockEvents.forEach(ev=>document.addEventListener(ev,unlockAudio,true));
 function heard(text,conf,status){$('heard').textContent='Heard: “'+text+'”'+(conf?' · '+Math.round(conf*100)+'%':'')+' — '+status}
 function syncAudioUI(){
   $('msens').value=msens;$('msv').textContent=msens+' / 10';
-  $('ovol').value=ovol;$('ovv').textContent=ovol+'%';$('beepOn').checked=beepOn;
+  $('ovol').value=ovol;$('ovv').textContent=ovol+'%';$('beepOn').checked=beepOn;$('mvol').value=mvol;$('mvv').textContent=mvol+'%';$('mlat').value=mlat;$('mlv').textContent=mlat+' ms';
   $('sMic').textContent=wantOn?'🎤 Stop listening':'🎤 Start listening to calibrate';
 }
 $('setBtn').onclick=()=>{syncAudioUI();$('sDlg').showModal()};
 $('sClose').onclick=()=>$('sDlg').close();
+$('mvol').oninput=e=>{mvol=+e.target.value;lsSet('mvol',mvol);syncAudioUI()};
+$('mlat').oninput=e=>{mlat=+e.target.value;lsSet('mlat',mlat);syncAudioUI()};
+$('mvol').onchange=()=>{const a=audioCtx();if(a)metClick(a.currentTime+0.05,true)};
+$('sClick').onclick=()=>{const a=audioCtx();if(a){metClick(a.currentTime+0.05,true);metClick(a.currentTime+0.55,false);metClick(a.currentTime+1.05,false)}};
 $('msens').oninput=e=>{msens=+e.target.value;lsSet('msens',msens);syncAudioUI()};
 $('ovol').oninput=e=>{ovol=+e.target.value;lsSet('ovol',ovol);syncAudioUI()};
 $('ovol').onchange=()=>beep(true);
@@ -2261,6 +2555,7 @@ function parseCommand(txt){
   if(/\b(pause|hold|freeze)\b|^stop$/.test(s))return{a:'pause'};
   if(/\breset\b/.test(s))return{a:'reset'};
   if(/\b(start|play|resume)\b/.test(s))return{a:'start'};
+  if(/\b(metronome|unmute|mute)\b/.test(s))return{a:'met',on:/\bunmute\b/.test(s)?true:(/\b(mute|off)\b/.test(s)?false:(/\bon\b/.test(s)?true:null))};
   if(/\b(first page|beginning)\b/.test(s))return{a:'first'};
   if(/\b(last page|end)\b/.test(s))return{a:'last'};
   if(/\b(previous|back|backward|backwards|before)\b/.test(s))return{a:'prev'};
@@ -2271,6 +2566,7 @@ function runCommand(c){
   const inDoc=pages.length>0;
   switch(c.a){
     case 'stop':stopVoice();toast('Voice commands off');break;
+    case 'met':if(current&&pages.length&&(c.on===null||c.on===metMute))metToggleMute();break;
     case 'start':if(current&&pages.length){tempoStart();toast('Tempo line: start')}break;
     case 'pause':if(current&&pages.length){tempoPause();toast('Tempo line: paused')}break;
     case 'reset':if(current&&pages.length)tempoReset();break;

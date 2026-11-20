@@ -10,7 +10,7 @@ PARTITURA - installable app (PWA)
 
 Files: index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png,
 icon-maskable-512.png, apple-touch-icon.png. Keep them together in one folder.
-When you change a file, raise the version number in sw.js (partitura-v27 -> v28).
+When you change a file, raise the version number in sw.js (partitura-v28 -> v29).
 
 BACKUP / SYNC BETWEEN DEVICES (environment backup, format v2)
 Library screen > Export library saves one ZIP (library.json + the PDFs).
@@ -59,3 +59,9 @@ Library screen > "Pedal". Bluetooth pedals (AirTurn, PageFlip, ...) work in keyb
 Bluetooth settings; MIDI pedals need "Enable MIDI" (Chrome/Edge; not Safari/iPhone; needs https). Defaults:
 Pedal 1 = next page (next tempo box while the line plays), Pedal 2 = previous page (restart loop while it plays).
 Use "Learn pedal" to map any key or MIDI note / controller / program change to 14 actions. Mappings are stored per device.
+
+METRONOME, PER-BOX TEMPO, BARLINES
+Tempo panel: each box can have its own BPM, time signature (BPM = beats in 60 s), end BPM (gradual speed-up / slow-down),
+sound on/off, and barlines (the yellow line then follows the real measures). Split a box to change tempo partway along a staff row.
+Per PDF: metronome sound on/off and count-in. Audio settings: metronome volume and click latency (Bluetooth headphones).
+Backups that use these are written as format version 3 (older app versions will refuse them with a clear message).
